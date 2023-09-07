@@ -1,4 +1,4 @@
-from config import DevelopmentConfig
+from app.config import DevelopmentConfig
 
 
 config = DevelopmentConfig()

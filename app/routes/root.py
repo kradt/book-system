@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 
-router = APIRouter(name="Auth of booking system", prefix="/auth")
+router = APIRouter(prefix="/auth")
 
 
 @router.get("/")
