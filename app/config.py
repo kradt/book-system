@@ -12,6 +12,7 @@ class BaseConfig(BaseSettings):
     DEBUG: bool = False
     SECRET_KEY: str = os.getenv("SECRET_KEY", default=secrets.token_hex())
     MONGO_URI: str = os.getenv("MONGO_URI")
+    MONGO_DATABASE_NAME: str = os.getenv("MONGO_DATABASE_NAME")
 
 
 class DevelopmentConfig(BaseConfig):
