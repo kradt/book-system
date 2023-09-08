@@ -1,38 +1,43 @@
-from fastapi import APIRouter, Depends, Body, Path, status
+from fastapi import APIRouter, Path, status, Depends
 from typing import Annotated
 
 from app.schemas.rooms import Room, RoomUpdate, RoomOutput
+from app.dependencies import get_room
 from app import models
 
 
 router = APIRouter(prefix="/rooms", tags=["Rooms"])
 
 
-@router.get("/{room_id}", status_code=status.HTTP_200_OK, response_model=Room)
+@router.get("/{room_id}", status_code=status.HTTP_200_OK, response_model=RoomOutput)
 async def get_specific_room(room_id: Annotated[str, Path(title="The id of specific room")]):
     """
         Getting specific room 
     """
-    return models.Room.find_one({"id": room_id})
+    return await models.Room.get(room_id)
 
 
 @router.patch("/{room_id}", status_code=status.HTTP_200_OK, response_model=RoomOutput)
 async def update_room_info(
     room_id: Annotated[str, Path(title="The id of specific room")],
-    room: RoomUpdate):
+    room: RoomUpdate,
+    db_room: Annotated[models.Room, Depends(get_room)]):
     """
         Update room info
     """
-    db_room = models.Room.find({"_id": room_id})
-    if not db_room:
-        pass
-        # Raise Error
-
-    db_room.name = room.name
-    db_room.replace()
-
-   
+    await db_room.set({"name": room.name})
     return db_room
+
+
+@router.delete("/{room_id}", status_code=204)
+async def delete_room(
+        room_id: Annotated[str, Path(title="The id of specific room")],
+        db_room: Annotated[models.Room, Depends(get_room)]):
+    """
+        Remove room from base
+    """
+    await db_room.delete()
+    return {"message": f"The room with id {room_id} was Succefuly delete"}
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=Room)
@@ -51,4 +56,3 @@ async def get_all_rooms():
         Getting all rooms saved in the database
     """
     return await models.Room.find_all().to_list()
-

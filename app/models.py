@@ -1,5 +1,4 @@
 from beanie import Document, Indexed, init_beanie
-from bson import ObjectId
 from app.schemas.rooms import Place
 from app.tools import PyObjectId
 
