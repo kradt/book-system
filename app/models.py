@@ -1,8 +1,11 @@
 from beanie import Document, Indexed, init_beanie
+from bson import ObjectId
 from app.schemas.rooms import Place
+from app.tools import PyObjectId
 
 
 class Room(Document):
+    id: PyObjectId
     name: str | None = None
     columns: int
     rows: int
@@ -10,10 +13,12 @@ class Room(Document):
 
     def __init__(
             self,
+            *args,
             columns: int,
             rows: int,
             name: str | None = None,
-            places: list[Place] | None = None):
+            places: list[Place] | None = None,
+            **kwargs):
         
         if places is None:
             places = []
@@ -22,5 +27,5 @@ class Room(Document):
                     new_place = Place(column=col, row=row)
                     places.append(new_place)
 
-        super().__init__(name=name, columns=columns, rows=rows, places=places)
+        super().__init__(*args, name=name, columns=columns, rows=rows, places=places, **kwargs)
 
