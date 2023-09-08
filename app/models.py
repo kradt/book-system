@@ -21,9 +21,10 @@ class Room(Document):
         
         if places is None:
             places = []
-            for row in range(rows):
-                for col in range(columns):
-                    new_place = Place(column=col, row=row)
+            for row in range(1, rows + 1):
+                for col in range(1, columns + 1):
+                    number_from_start = (row-1) * columns + col
+                    new_place = Place(column=col, row=row, number=number_from_start)
                     places.append(new_place)
 
         super().__init__(*args, name=name, columns=columns, rows=rows, places=places, **kwargs)

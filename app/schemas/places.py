@@ -11,5 +11,10 @@ class Place(BaseModel):
     """
     column: int
     row: int
+    number: int
     booked: bool = False
     additional_data: dict | None = None
+
+
+    class Config:
+        from_orm = True
