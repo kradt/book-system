@@ -20,7 +20,4 @@ async def get_seat_by_number(
     """
         Depends that using for getting specific seat
     """
-    if seat_number > len(db_room.seats) or seat_number <= 0:
-        raise HTTPException(404, "Seat with this number doesn't exist")
-    for seat in db_room.seats:
-        if seat.number == seat_number: return seat
+    return await models.Seat.find_one({"number": seat_number})

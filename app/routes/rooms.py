@@ -3,8 +3,9 @@ from typing import Annotated
 from bson import ObjectId
 from pydantic import ValidationError
 
-from app.schemas.rooms import Room, RoomOutput
-from app.schemas.seats import Seat, SeatCreate
+from app.schemas.rooms import Room, RoomOutput, Seat
+from app.schemas.seats import SeatCreate, Seat
+
 from app.dependencies import get_room_by_id, get_seat_by_number
 from app import models
 
@@ -68,21 +69,21 @@ async def delete_room(
 @router.post("/rooms/", status_code=status.HTTP_201_CREATED, response_model=Room)
 async def create_new_room(
         room: Room,
-        autogenerate: Annotated[bool, Query(title="If True the seats will be generated before creating")],
-        columns: Annotated[int, Query(title="Amount of columns in the room")],
-        rows: Annotated[int, Query(title="Amount of rows in the room")]):
+        autogenerate: Annotated[bool | None, Query(title="If True the seats will be generated before creating")] = None,
+        columns: Annotated[int | None, Query(title="Amount of columns in the room")] = None,
+        rows: Annotated[int | None, Query(title="Amount of rows in the room")] = None):
     """
         Create new room
     """
     if await models.Room.find_one({"name": room.name}):
         raise HTTPException(status_code=404, detail="The room with same name already exist")
     new_room = models.Room(_id=ObjectId(), name=room.name)
+    await new_room.create()
     if autogenerate:
-        seats = new_room.generate_seats(columns=columns, rows=rows)
+        seats = await new_room.generate_seats(columns=columns, rows=rows)
     else:
         seats = [models.Seat(**seat.dict()) for seat in room.seats]
-    new_room.fill_room_by_seats(seats)
-    await new_room.insert()
+    await new_room.fill_room_by_seats(seats)
     return new_room
 
 

@@ -3,13 +3,12 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
 
 from app import config
-from app.routes import root, rooms
+from app.routes import rooms
 from app.models import Room, Seat
 
 
 app = FastAPI(title="Booking API system")
 
-app.include_router(root.router)
 app.include_router(rooms.router)
 
 

@@ -1,4 +1,6 @@
-from beanie import Document, Link
+from beanie import Document, Link, BackLink
+from pydantic import Field
+
 from app.tools import PyObjectId
 
 
@@ -6,12 +8,12 @@ class Seat(Document):
     """
         Model that implement seat in the some room like theatre or cinema
     """
-
     row: int
     column: int
     number: int 
     booked: bool = False
     additional_data: dict | None = None
+    room: BackLink["Room"] = Field(original_field="seats")
     
     def book(self):
         if self.booked:
@@ -31,14 +33,16 @@ class Room(Document):
     name: str | None = None
     seats: list[Link[Seat]] | None = None
 
-    def generate_seats(self, rows, columns) -> list[Seat]:
+    async def generate_seats(self, rows, columns) -> list[Seat]:
         seats = []
         for row in range(1, rows + 1):
             for col in range(1, columns + 1):
                 number_from_start = (row-1) * columns + col
-                new_seat = Seat(column=col, row=row, number=number_from_start)
+                new_seat = Seat(column=col, row=row, number=number_from_start, room=self)
+                await new_seat.create()
                 seats.append(new_seat)
         return seats
     
-    def fill_room_by_seats(self, seats: list[Seat]) -> None:
+    async def fill_room_by_seats(self, seats: list[Seat]) -> None:
         self.seats = seats
+        await self.save()
