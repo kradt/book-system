@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Path, status, Depends, HTTPException
+from fastapi import APIRouter, Path, status, Depends, HTTPException, Query
 from typing import Annotated
 from bson import ObjectId
 
@@ -23,23 +23,46 @@ async def book_a_seat(
     return db_seat
 
 
-@router.post("/rooms/{room_id}/seats", status_code=201, response_model=Seat)
-def create_new_seat(
-    db_room: Annotated[models.Room, Depends(get_room_by_id)],
-    seat: SeatCreate):
-    seats = db_room.seats
-    new_seat = Seat()
-
-
 @router.get("/rooms/{room_id}/seats/{seat_number}/", status_code=200, response_model=Seat)
 def get_specific_seat(
         db_seat: Annotated[Seat, Depends(get_seat_by_number)]):
     return db_seat
 
 
+@router.post("/rooms/{room_id}/seats", status_code=201, response_model=Seat)
+def create_new_seat(
+        db_room: Annotated[models.Room, Depends(get_room_by_id)],
+    seat: SeatCreate):
+    seats = db_room.seats
+    new_seat = Seat()
+
+
+@router.delete("/rooms/{room_id}/seats/{seat_id}", status_code=204)
+def delete_seat_from_room(
+        db_seat: Annotated[Seat, Depends(get_seat_by_number)],
+        db_room: Annotated[models.Room, Depends(get_room_by_id)]):
+    """
+        Make seat empty 
+        Using for cuting necessary shape of room
+    """
+    db_seat.empty = True
+    for seat in db_room.seats:
+        seat.number = db_room.seats.index(seat) + 1
+    db_room.save()
+    return {"message": "The Seat was successfully deleted!"}
+
+
 @router.get("/rooms/{room_id}/seats/", status_code=200, response_model=list[Seat])
-def get_seat_specific_room(db_room: Annotated[models.Room, Depends(get_room_by_id)]):
-    return db_room.seats
+def get_allseat_specific_room(db_room: Annotated[models.Room, Depends(get_room_by_id)],
+                              show_deleted: Annotated[bool, Query(title="Show deleted places in response or pass it")]):
+    """
+        Get all seats of specific room
+    """
+    
+    seats = db_room.seats
+    if not show_deleted:
+        seats = [seat for seat in seats if not seat.empty]
+    return seats
 
 
 @router.patch("/rooms/{room_id}", status_code=status.HTTP_200_OK, response_model=RoomOutput)

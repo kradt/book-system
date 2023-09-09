@@ -23,3 +23,4 @@ class Seat(SeatCreate):
     column: int
     row: int
     number: int
+    empty: bool = False
