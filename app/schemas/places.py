@@ -1,12 +1,12 @@
 from pydantic import BaseModel
 
 
-class Place(BaseModel):
+class Seat(BaseModel):
     """
         :param column: number of column in columns
         :param row: number of row in rows
-        :booked: if place booked set to True
-        :additional_data: You can use it to pass some additional info like price of something else
+        :booked: if seat booked set to True
+        :additional_data: You can use it to pass some additional info like price or something else
         
     """
     column: int

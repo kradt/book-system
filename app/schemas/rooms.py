@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from bson import ObjectId
 from typing import Annotated
 
-from .places import Place
+from .places import Seat
 from app.tools import PyObjectId
 
 class RoomUpdate(BaseModel):
@@ -24,7 +24,7 @@ class Room(RoomUpdate):
     """
     columns: int = 10
     rows: int = 5
-    places: list[Place] | None = None
+    seats: list[Seat] | None = None
 
 
 class RoomOutput(Room):
