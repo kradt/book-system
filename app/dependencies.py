@@ -4,7 +4,7 @@ from typing import Annotated
 from app import models
 
 
-async def get_room_by_id(room_id):
+async def get_room_by_id(room_id: str):
     """
         Depends that useing for getting specific room
     """
@@ -21,3 +21,10 @@ async def get_seat_by_number(
         Depends that using for getting specific seat
     """
     return await models.Seat.find_one({"number": seat_number})
+
+
+async def get_event_by_id(event_id: str):
+    event = await models.Event.get(event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="There is no such events")
+    return event

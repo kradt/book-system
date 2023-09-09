@@ -1,3 +1,4 @@
+import datetime
 from beanie import Document, Link, BackLink
 from pydantic import Field
 
@@ -46,3 +47,11 @@ class Room(Document):
     async def fill_room_by_seats(self, seats: list[Seat]) -> None:
         self.seats = seats
         await self.save()
+
+
+class Event(Document):
+    title: str
+    time_start: datetime.datetime
+    time_finish: datetime.datetime
+    additional_data: str | None
+    room: Link[Room]

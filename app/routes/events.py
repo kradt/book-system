@@ -1,8 +1,12 @@
 from fastapi import APIRouter, Depends
 from typing import Annotated
 
+from app import models
+from app.schemas.events import Event
+from app.dependencies import get_event_by_id
 
-router = APIRouter(tags=["events"])
+
+router = APIRouter(tags=["Events"])
 
 
 @router.delete("/events/{event_id}", status_code=204)
