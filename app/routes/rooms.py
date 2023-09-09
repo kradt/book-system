@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Path, status, Depends, HTTPException, Query
 from typing import Annotated
 from bson import ObjectId
+from pydantic import ValidationError
 
-from app.schemas.rooms import Room, RoomUpdate, RoomOutput
+from app.schemas.rooms import Room, RoomOutput
 from app.schemas.seats import Seat, SeatCreate
 from app.dependencies import get_room_by_id, get_seat_by_number
 from app import models
@@ -11,15 +12,22 @@ from app import models
 router = APIRouter(tags=["Rooms"])
 
 
-@router.get("/rooms/{room_id}/seats/{seat_number}/book", status_code=200, response_model=Seat)
+@router.patch("/rooms/{room_id}/seats/{seat_number}/", status_code=200, response_model=Seat)
 async def book_a_seat(
         db_seat: Annotated[Seat, Depends(get_seat_by_number)],
-        db_room: Annotated[models.Room, Depends(get_room_by_id)]):
-    
-    if db_seat.booked:
+        seat: SeatCreate):
+    """
+        Update specific seat
+        You can update additional data and booking status of seat
+        If you want to change other data you should use patch method of room to change all seats
+    """
+    try:
+        if seat.booked == True: db_seat.book()
+        elif seat.booked == False: db_seat.unbook()
+    except ValueError:
         raise HTTPException(400, "The seat already booked")
-    db_seat.booked = True
-    await db_room.save()
+    db_seat.additional_data = seat.additional_data
+    await db_seat.save()
     return db_seat
 
 
@@ -29,50 +37,18 @@ def get_specific_seat(
     return db_seat
 
 
-@router.post("/rooms/{room_id}/seats", status_code=201, response_model=Seat)
-def create_new_seat(
-        db_room: Annotated[models.Room, Depends(get_room_by_id)],
-    seat: SeatCreate):
-    seats = db_room.seats
-    new_seat = Seat()
-
-
-@router.delete("/rooms/{room_id}/seats/{seat_id}", status_code=204)
-def delete_seat_from_room(
-        db_seat: Annotated[Seat, Depends(get_seat_by_number)],
-        db_room: Annotated[models.Room, Depends(get_room_by_id)]):
-    """
-        Make seat empty 
-        Using for cuting necessary shape of room
-    """
-    db_seat.empty = True
-    for seat in db_room.seats:
-        seat.number = db_room.seats.index(seat) + 1
-    db_room.save()
-    return {"message": "The Seat was successfully deleted!"}
-
-
-@router.get("/rooms/{room_id}/seats/", status_code=200, response_model=list[Seat])
-def get_allseat_specific_room(db_room: Annotated[models.Room, Depends(get_room_by_id)],
-                              show_deleted: Annotated[bool, Query(title="Show deleted places in response or pass it")]):
-    """
-        Get all seats of specific room
-    """
-    
-    seats = db_room.seats
-    if not show_deleted:
-        seats = [seat for seat in seats if not seat.empty]
-    return seats
-
-
 @router.patch("/rooms/{room_id}", status_code=status.HTTP_200_OK, response_model=RoomOutput)
 async def update_room_info(
-    room: RoomUpdate,
-    db_room: Annotated[models.Room, Depends(get_room_by_id)]):
+        room: Room,
+        db_room: Annotated[models.Room, Depends(get_room_by_id)]):
     """
         Update room info
     """
-    await db_room.set({"name": room.name})
+    if room.name:
+        await db_room.set({"name": room.name})
+    if room.seats:
+        await db_room.set({"name": room.seats})
+    await db_room.save()
     return db_room
 
 
@@ -93,7 +69,8 @@ async def create_new_room(room: Room):
     """
     if await models.Room.find_one({"name": room.name}):
         raise HTTPException(status_code=404, detail="The room with same name already exist")
-    new_room = models.Room(_id=ObjectId(), name=room.name, columns=room.columns, rows=room.rows, places=room.places)
+    seats = [models.Seat(**seat.dict()) for seat in room.seats]
+    new_room = models.Room(_id=ObjectId(), name=room.name, seats=seats)
     await new_room.insert()
     return new_room
 

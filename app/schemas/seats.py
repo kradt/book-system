@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class SeatCreate(BaseModel):
@@ -20,7 +20,6 @@ class Seat(SeatCreate):
         :param number: seat number
         
     """
-    column: int
-    row: int
-    number: int
-    empty: bool = False
+    column: int = Field(gt=0)
+    row: int = Field(gt=0)
+    number: int = Field(gt=0)
