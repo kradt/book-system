@@ -34,6 +34,9 @@ async def book_a_seat(
 @router.get("/rooms/{room_id}/seats/{seat_number}/", status_code=200, response_model=Seat)
 def get_specific_seat(
         db_seat: Annotated[Seat, Depends(get_seat_by_number)]):
+    """
+        Get specific Seat by seat number
+    """
     return db_seat
 
 
@@ -63,14 +66,22 @@ async def delete_room(
 
 
 @router.post("/rooms/", status_code=status.HTTP_201_CREATED, response_model=Room)
-async def create_new_room(room: Room):
+async def create_new_room(
+        room: Room,
+        autogenerate: Annotated[bool, Query(title="If True the seats will be generated before creating")],
+        columns: Annotated[int, Query(title="Amount of columns in the room")],
+        rows: Annotated[int, Query(title="Amount of rows in the room")]):
     """
         Create new room
     """
     if await models.Room.find_one({"name": room.name}):
         raise HTTPException(status_code=404, detail="The room with same name already exist")
-    seats = [models.Seat(**seat.dict()) for seat in room.seats]
-    new_room = models.Room(_id=ObjectId(), name=room.name, seats=seats)
+    new_room = models.Room(_id=ObjectId(), name=room.name)
+    if autogenerate:
+        seats = new_room.generate_seats(columns=columns, rows=rows)
+    else:
+        seats = [models.Seat(**seat.dict()) for seat in room.seats]
+    new_room.fill_room_by_seats(seats)
     await new_room.insert()
     return new_room
 

@@ -3,6 +3,9 @@ from app.tools import PyObjectId
 
 
 class Seat(Document):
+    """
+        Model that implement seat in the some room like theatre or cinema
+    """
 
     row: int
     column: int
@@ -21,6 +24,9 @@ class Seat(Document):
 
 
 class Room(Document):
+    """
+        Model Room that implement room in the cinema or theatre
+    """
     id: PyObjectId
     name: str | None = None
     seats: list[Link[Seat]] | None = None
