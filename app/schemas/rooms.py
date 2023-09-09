@@ -1,9 +1,9 @@
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field
 from bson import ObjectId
-from typing import Annotated
 
-from .places import Seat
+from .seats import Seat
 from app.tools import PyObjectId
+
 
 class RoomUpdate(BaseModel):
     """

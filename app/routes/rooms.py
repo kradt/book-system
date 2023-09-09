@@ -3,7 +3,7 @@ from typing import Annotated
 from bson import ObjectId
 
 from app.schemas.rooms import Room, RoomUpdate, RoomOutput
-from app.schemas.places import Seat
+from app.schemas.seats import Seat, SeatCreate
 from app.dependencies import get_room_by_id, get_seat_by_number
 from app import models
 
@@ -24,7 +24,12 @@ async def book_a_seat(
 
 
 @router.post("/rooms/{room_id}/seats", status_code=201, response_model=Seat)
-def create_new_seat 
+def create_new_seat(
+    db_room: Annotated[models.Room, Depends(get_room_by_id)],
+    seat: SeatCreate):
+    seats = db_room.seats
+    new_seat = Seat()
+
 
 @router.get("/rooms/{room_id}/seats/{seat_number}/", status_code=200, response_model=Seat)
 def get_specific_seat(
