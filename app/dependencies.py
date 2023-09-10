@@ -1,5 +1,7 @@
 from fastapi import HTTPException, Depends, Path
-from typing import Annotated
+from typing import Annotated 
+from beanie.odm.operators.find.logical import Or, And
+
 
 from app import models
 

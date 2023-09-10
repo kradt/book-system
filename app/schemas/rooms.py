@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from bson import ObjectId
 
-from .seats import Seat
+from app.schemas.seats import Seat
 from app.tools import PyObjectId
 
 
