@@ -14,7 +14,7 @@ router = APIRouter(tags=["Rooms"])
 
 
 @router.patch("/rooms/{room_id}/seats/{seat_number}/", status_code=200, response_model=Seat)
-async def book_a_seat(
+async def update_seat_data(
         db_seat: Annotated[Seat, Depends(get_seat_by_number)],
         seat: SeatCreate):
     """
