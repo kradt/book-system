@@ -1,17 +1,35 @@
 from fastapi import APIRouter, Path, status, Depends, HTTPException, Query
 from typing import Annotated
 from bson import ObjectId
-from pydantic import ValidationError
 
 from app.schemas.rooms import Room, RoomOutput, Seat
 from app.schemas.seats import SeatCreate, Seat
-
-from app.dependencies import get_room_by_id, get_seat_by_number
+from app.schemas.events import Event, EventCreate
+from app.dependencies import get_room_by_id, get_seat_by_number, get_event_by_id
 from app import models
 
 
 router = APIRouter(tags=["Rooms"])
 
+
+@router.delete("/room/{room_id}/events/{event_id}/", status_code=204)
+def delete_event_by_id(event: Annotated[Event, Depends(get_event_by_id)]):
+    pass
+
+
+@router.post("/room/{room_id}/events/", status_code=201, response_model=Event)
+def create_event(event: EventCreate):
+    pass
+
+
+@router.get("room/{room_id}/events/{event_id}/", status_code=200, response_model=Event)
+def get_specific_event_by_id(event: Annotated[Event, Depends(get_event_by_id)]):
+    pass
+
+
+@router.get("/events/{room_id}/", status_code=200, response_model=list[Event])
+def get_all_event():
+    pass
 
 @router.patch("/rooms/{room_id}/seats/{seat_number}/", status_code=200, response_model=Seat)
 async def update_seat_data(

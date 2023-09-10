@@ -33,6 +33,7 @@ class Room(Document):
     id: PyObjectId
     name: str | None = None
     seats: list[Link[Seat]] | None = None
+    events: list[Link["Event"]] | None = None
 
     async def generate_seats(self, rows, columns) -> list[Seat]:
         seats = []
@@ -54,4 +55,4 @@ class Event(Document):
     time_start: datetime.datetime
     time_finish: datetime.datetime
     additional_data: str | None
-    room: Link[Room]
+    room: BackLink[Room] = Field(original_field="events")
