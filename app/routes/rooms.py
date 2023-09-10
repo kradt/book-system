@@ -18,8 +18,27 @@ def delete_event_by_id(event: Annotated[Event, Depends(get_event_by_id)]):
 
 
 @router.post("/room/{room_id}/events/", status_code=201, response_model=Event)
-def create_event(event: EventCreate):
-    pass
+async def create_event(
+        db_room: Annotated[models.Room, Depends(get_room_by_id)],
+        event: EventCreate):
+    if await models.Event.time_is_booked(db_room, event.time_start, event.time_finish):
+        raise HTTPException(status_code=400, detail="The Room already have event it that time")
+    
+    new_event = models.Event(
+        _id=ObjectId(),
+        title=event.title, 
+        time_start=event.time_start, 
+        time_finish=event.time_finish, 
+        additional_data=event.additional_data, 
+        room=db_room)
+    
+    await new_event.create()
+    if db_room.events:
+        db_room.events.append(new_event)
+    else:
+        db_room.events = [new_event]
+    await db_room.save()
+    return new_event
 
 
 @router.get("room/{room_id}/events/{event_id}/", status_code=200, response_model=Event)
@@ -27,9 +46,10 @@ def get_specific_event_by_id(event: Annotated[Event, Depends(get_event_by_id)]):
     pass
 
 
-@router.get("/events/{room_id}/", status_code=200, response_model=list[Event])
+@router.get("/room/{room_id}/events/{event_id}/", status_code=200, response_model=list[Event])
 def get_all_event():
     pass
+
 
 @router.patch("/rooms/{room_id}/seats/{seat_number}/", status_code=200, response_model=Seat)
 async def update_seat_data(

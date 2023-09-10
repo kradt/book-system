@@ -1,5 +1,8 @@
 import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from bson import ObjectId
+
+from app.tools import PyObjectId
 from app.schemas.rooms import Room
 
 
@@ -21,3 +24,12 @@ class Event(EventCreate):
         :param room: Link for specific room where will be going current event
     """
     room: Room
+
+
+class EventOutput(Event):
+    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}

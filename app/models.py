@@ -1,7 +1,8 @@
 import datetime
 from beanie import Document, Link, BackLink
 from pydantic import Field
-
+from beanie.odm.operators.find.comparison import GTE, LTE
+from beanie.odm.operators.find.logical import Or, And
 from app.tools import PyObjectId
 
 
@@ -51,8 +52,25 @@ class Room(Document):
 
 
 class Event(Document):
+    id: PyObjectId
     title: str
     time_start: datetime.datetime
     time_finish: datetime.datetime
-    additional_data: str | None
+    additional_data: dict | None
     room: BackLink[Room] = Field(original_field="events")
+
+    @classmethod
+    async def time_is_booked(cls, room: Room, time_from: datetime.datetime, time_finish: datetime.timedelta) -> bool:
+        events_in_interval = await Event.find(
+            Or(
+                And(
+                    LTE(Event.time_start, time_from),
+                    GTE(Event.time_finish, time_finish)
+                ),
+                And(
+                    GTE(Event.time_start, time_from),
+                    LTE(Event.time_finish, time_finish)
+            ),
+            Event.room.id == room.id)
+        ).to_list()
+        return events_in_interval
