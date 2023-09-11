@@ -18,7 +18,6 @@ async def delete_event_by_id(event: Annotated[Event, Depends(get_event_by_id)]):
         Deleting specific event using it id
     """
     await event.delete()
-    return {"message": "Event was successfully deleted"}
 
 
 @router.post("/room/{room_id}/events/", tags=["Events"], status_code=201, response_model=EventOutput)
@@ -104,9 +103,9 @@ async def update_room_info(
         Update room info
     """
     if room.name:
-        await db_room.set({"name": room.name})
+        db_room.name = room.name
     if room.seats:
-        await db_room.set({"name": room.seats})
+        db_room.seats = [models.Seat(**seat.dict(), room=db_room) for seat in room.seats]
     await db_room.save()
     return db_room
 
@@ -118,7 +117,6 @@ async def delete_room(
         Remove room from base
     """
     await db_room.delete()
-    return {"message": f"The room with id {db_room.id} was Succefuly delete"}
 
 
 @router.post("/rooms/", tags=["Rooms"], status_code=status.HTTP_201_CREATED, response_model=Room)
@@ -142,7 +140,7 @@ async def create_new_room(
     return new_room
 
 
-@router.get("/rooms/{room_id}", tags=["Rooms"], status_code=status.HTTP_200_OK, response_model=RoomOutput)
+@router.get("/rooms/{room_id}/", tags=["Rooms"], status_code=status.HTTP_200_OK, response_model=RoomOutput)
 async def get_specific_room(room_id: Annotated[str, Path(title="The id of specific room")]):
     """
         Getting specific room 

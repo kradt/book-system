@@ -1,9 +1,9 @@
 import pytest
+from bson import ObjectId
 from asgi_lifespan import LifespanManager
 from httpx import AsyncClient
-from app import models, config
+from app import models
 from app.main import app
-
 
         
 @pytest.fixture()
@@ -21,4 +21,11 @@ async def room_json(client):
     room = models.Room.find_one({"name": necessary_dict["name"]})
     if room:
         await room.delete()
-        
+
+
+@pytest.fixture()
+async def created_room(client, room_json):
+    room = models.Room(_id=ObjectId(), **room_json)
+    await room.create()
+    yield room
+    await room.delete()
