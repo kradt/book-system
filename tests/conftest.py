@@ -16,7 +16,12 @@ async def client():
 
 @pytest.fixture()
 async def room_json(client):
-    necessary_dict = {"name": "First Room", "seats": [{"row": 1, "column": 1, "number": 1, 'booked': False, 'additional_data': None,}]}
+    necessary_dict = {
+        "name": "First Room",
+        "seats": [
+            {"row": 1, "column": 1, "number": 1, 'booked': False, 'additional_data': None}
+            ]
+    }
     yield necessary_dict
     room = models.Room.find_one({"name": necessary_dict["name"]})
     if room:
@@ -29,3 +34,4 @@ async def created_room(client, room_json):
     await room.create()
     yield room
     await room.delete()
+    [await seat.delete() for seat in room.seats if room.seats]

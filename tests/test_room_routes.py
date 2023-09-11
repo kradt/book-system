@@ -1,4 +1,6 @@
 import pytest
+import datetime
+
 from app import models
 
 
@@ -101,6 +103,7 @@ async def test_update_specific_seat(client, created_room):
     }
     response = await client.patch(f"/rooms/{created_room.id}/seats/{created_room.seats[0].number}/", json=first_json_update)
     seat = response.json()
+    print(seat)
     assert response.status_code == 200
     assert seat["booked"] == first_json_update["booked"]
 
@@ -112,3 +115,21 @@ async def test_update_specific_seat(client, created_room):
     assert response.status_code == 200
     assert seat["booked"] == first_json_update["booked"]
     assert seat["additional_data"] == second_json_update["additional_data"]
+
+
+@pytest.mark.asyncio
+async def test_get_all_events_specific_room_by_room_id(client, created_room):
+    pass
+
+
+@pytest.mark.asyncio
+async def create_event_for_specific_room(client, created_room):
+    body = {
+        "title": "The Big Lebovski",
+        "time_start": datetime.datetime(2022, 1, 2, 13, 00),
+        "time_finish": datetime.datetime(2022, 1, 2, 14, 00)
+    }
+    response = await client.post(f"/rooms/{created_room.id}/events/", json=body)
+    print(response.json())
+    assert response.status_code == 201
+

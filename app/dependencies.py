@@ -1,4 +1,5 @@
 from fastapi import HTTPException, Depends, Path
+from bson import ObjectId
 from typing import Annotated 
 
 from app import models
@@ -20,7 +21,11 @@ async def get_seat_by_number(
     """
         Depends that using for getting specific seat
     """
-    return await models.Seat.find_one({"number": seat_number})
+   
+    """
+        TODO: getting room 
+    """
+    return room
 
 
 async def get_event_by_id(event_id: str):
