@@ -52,6 +52,9 @@ class Room(Document):
 
 
 class Event(Document):
+    """
+        Model that implement specific Event like some perfomance or film
+    """
     id: PyObjectId
     title: str
     time_start: datetime.datetime

@@ -14,6 +14,9 @@ router = APIRouter()
 
 @router.delete("/events/{event_id}/", tags=["Events"], status_code=204)
 async def delete_event_by_id(event: Annotated[Event, Depends(get_event_by_id)]):
+    """
+        Deleting specific event using it id
+    """
     await event.delete()
     return {"message": "Event was successfully deleted"}
 
@@ -22,6 +25,9 @@ async def delete_event_by_id(event: Annotated[Event, Depends(get_event_by_id)]):
 async def create_event(
         db_room: Annotated[models.Room, Depends(get_room_by_id)],
         event: EventCreate):
+    """
+        Create new event
+    """
     if await models.Event.time_is_booked(db_room, event.time_start, event.time_finish):
         raise HTTPException(status_code=400, detail="The Room already have event it that time")
     
@@ -39,11 +45,17 @@ async def create_event(
 
 @router.get("/events/{event_id}/", tags=["Events"], status_code=200, response_model=EventOutput | None)
 def get_specific_event_by_id(event: Annotated[Event, Depends(get_event_by_id)]):
+    """
+        Get specific event using it id
+    """
     return event
 
 
 @router.get("/room/{room_id}/events/", tags=["Events"], status_code=200, response_model=list[EventOutput] | None)
 def get_all_event(db_room: Annotated[models.Room, Depends(get_room_by_id)]):
+    """
+        Get all events specific room
+    """
     return db_room.events
 
 
