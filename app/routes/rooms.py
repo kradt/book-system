@@ -137,7 +137,7 @@ async def create_new_room(
     if autogenerate:
         seats = await new_room.generate_seats(columns=columns, rows=rows)
     else:
-        seats = [models.Seat(**seat.dict()) for seat in room.seats]
+        seats = [models.Seat(**seat.dict()) for seat in room.seats if seat] if room.seats else []
     await new_room.fill_room_by_seats(seats)
     return new_room
 
