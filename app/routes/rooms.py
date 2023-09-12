@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Path, status, Depends, HTTPException, Query
 from typing import Annotated
 from bson import ObjectId
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.schemas.rooms import Room, RoomOutput, Seat
+from app.schemas.rooms import Room, Seat
 from app.schemas.seats import SeatCreate, Seat
-from app.schemas.events import Event, EventCreate, EventOutput
-from app.dependencies import get_room_by_id, get_seat_by_number, get_event_by_id
+from app.schemas.events import Event
+from app.dependencies import get_room_by_id, get_seat_by_number, get_event_by_id, get_session
 from app import models
 
 
@@ -20,10 +22,10 @@ async def delete_event_by_id(event: Annotated[Event, Depends(get_event_by_id)]):
     await event.delete()
 
 
-@router.post("/room/{room_id}/events/", tags=["Events"], status_code=201, response_model=EventOutput)
+@router.post("/room/{room_id}/events/", tags=["Events"], status_code=201, response_model=Event)
 async def create_event(
         db_room: Annotated[models.Room, Depends(get_room_by_id)],
-        event: EventCreate):
+        event: Event):
     """
         Create new event
     """
@@ -42,7 +44,7 @@ async def create_event(
     return new_event
 
 
-@router.get("/events/{event_id}/", tags=["Events"], status_code=200, response_model=EventOutput | None)
+@router.get("/events/{event_id}/", tags=["Events"], status_code=200, response_model=Event | None)
 def get_specific_event_by_id(event: Annotated[Event, Depends(get_event_by_id)]):
     """
         Get specific event using it id
@@ -50,7 +52,7 @@ def get_specific_event_by_id(event: Annotated[Event, Depends(get_event_by_id)]):
     return event
 
 
-@router.get("/room/{room_id}/events/", tags=["Events"], status_code=200, response_model=list[EventOutput] | None)
+@router.get("/room/{room_id}/events/", tags=["Events"], status_code=200, response_model=list[Event] | None)
 def get_all_event(db_room: Annotated[models.Room, Depends(get_room_by_id)]):
     """
         Get all events specific room
@@ -97,7 +99,7 @@ def get_specific_seat(
     return db_room.seats
 
 
-@router.patch("/rooms/{room_id}/", tags=["Rooms"], status_code=status.HTTP_200_OK, response_model=RoomOutput)
+@router.patch("/rooms/{room_id}/", tags=["Rooms"], status_code=status.HTTP_200_OK, response_model=Room)
 async def update_room_info(
         room: Room,
         db_room: Annotated[models.Room, Depends(get_room_by_id)]):
@@ -123,6 +125,7 @@ async def delete_room(
 
 @router.post("/rooms/", tags=["Rooms"], status_code=status.HTTP_201_CREATED, response_model=Room)
 async def create_new_room(
+        db: Annotated[AsyncSession, Depends(get_session)],
         room: Room,
         autogenerate: Annotated[bool | None, Query(title="If True the seats will be generated before creating")] = None,
         columns: Annotated[int | None, Query(title="Amount of columns in the room")] = None,
@@ -130,19 +133,33 @@ async def create_new_room(
     """
         Create new room
     """
-    if await models.Room.find_one({"name": room.name}):
+    query = await db.execute(select(models.Room).where(models.Room.name == room.name))
+    rooms = query.scalars().all()
+    print("ROOMS", rooms)
+    if rooms:
         raise HTTPException(status_code=404, detail="The room with same name already exist")
-    new_room = models.Room(_id=ObjectId(), name=room.name)
-    await new_room.create()
-    if autogenerate:
-        seats = await new_room.generate_seats(columns=columns, rows=rows)
-    else:
-        seats = [models.Seat(**seat.dict()) for seat in room.seats if seat] if room.seats else []
-    await new_room.fill_room_by_seats(seats)
+    try:
+        new_room = models.Room(name=room.name)
+    except Exception as e:
+        print(e)
+        
+    # if autogenerate:
+    #     seats = new_room.generate_seats(columns=columns, rows=rows)
+    #     db.add_all(seats)
+    # else:
+    #     seats = [models.Seat(**seat.dict()) for seat in room.seats if seat] if room.seats else []
+    #     db.add_all(seats)
+    # await new_room.fill_room_by_seats(seats)
+    try:
+        db.add(new_room)
+        await db.commit()
+    except:
+        await db.rollback()
+    print(new_room)
     return new_room
 
 
-@router.get("/rooms/{room_id}/", tags=["Rooms"], status_code=status.HTTP_200_OK, response_model=RoomOutput)
+@router.get("/rooms/{room_id}/", tags=["Rooms"], status_code=status.HTTP_200_OK, response_model=Room)
 async def get_specific_room(room_id: Annotated[str, Path(title="The id of specific room")]):
     """
         Getting specific room 
@@ -150,7 +167,7 @@ async def get_specific_room(room_id: Annotated[str, Path(title="The id of specif
     return await models.Room.get(room_id)
 
 
-@router.get("/rooms/", tags=["Rooms"], status_code=status.HTTP_200_OK, response_model=list[RoomOutput])
+@router.get("/rooms/", tags=["Rooms"], status_code=status.HTTP_200_OK, response_model=list[Room])
 async def get_all_rooms():
     """
         Getting all rooms saved in the database

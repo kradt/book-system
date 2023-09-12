@@ -1,4 +1,3 @@
-import datetime
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, JSON, ForeignKey
 
@@ -10,14 +9,14 @@ class Seat(Base):
     """
         Model that implement seat in the some room like theatre or cinema
     """
-    __tablename__ = "seat"
+    __tablename__ = "seats"
     id = Column(Integer, primary_key=True)
     row = Column(Integer, nullable=False)
     column = Column(Integer, nullable=False)
     number = Column(Integer, nullable=False)
     booked = Column(Boolean, default=False)
     additional_data = Column(JSON)
-    room_id = Column(Integer, ForeignKey("Room.id"))
+    room_id = Column(Integer, ForeignKey("rooms.id"))
     room = relationship("Room", back_populates="seats")
     
     def book(self):
@@ -34,12 +33,13 @@ class Room(Base):
     """
         Model Room that implement room in the cinema or theatre
     """
+    __tablename__ = "rooms"
     id = Column(Integer, primary_key=True)
     name = Column(String(100))
     seats = relationship("Seat", back_populates="room")
-    events = relationship("Event", back_populates="events")
+    events = relationship("Event", back_populates="room")
 
-    async def generate_seats(self, rows, columns) -> list[Seat]:
+    def generate_seats(self, rows, columns) -> list[Seat]:
         seats = []
         for row in range(1, rows + 1):
             for col in range(1, columns + 1):
@@ -50,19 +50,19 @@ class Room(Base):
     
     async def fill_room_by_seats(self, seats: list[Seat]) -> None:
         self.seats = seats
-        # TODO: SAVE DATA TO DB
 
 
 class Event(Base):
     """
         Model that implement specific Event like some perfomance or film
     """
+    __tablename__ = "events"
     id = Column(Integer, primary_key=True)
     title = Column(String(100))
     time_start = Column(DateTime)
     time_finish = Column(DateTime)
     additional_data = Column(JSON)
-    room_id = Column(Integer, ForeignKey("Room.id"))
+    room_id = Column(Integer, ForeignKey("rooms.id"))
     room = relationship("Room", back_populates="events")
 
     def __init__(self) -> None:

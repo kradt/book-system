@@ -10,7 +10,7 @@ class SeatCreate(BaseModel):
     additional_data: dict | None = None
 
     class Config:
-        from_orm = True
+        orm_mode = True
 
 
 class Seat(SeatCreate):

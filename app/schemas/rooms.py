@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from bson import ObjectId
 
 from app.schemas.seats import Seat
+from app.schemas.events import Event
 from app.tools import PyObjectId
 
 
@@ -14,15 +15,7 @@ class Room(BaseModel):
     """
     name: str | None = None
     seats: list[Seat] | None = None
+    events: list[Event] | None = None
 
     class Config:
         orm_mode = True
-
-
-class RoomOutput(Room):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-
-    class Config:
-        allow_population_by_field_name = True
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}

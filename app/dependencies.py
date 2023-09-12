@@ -1,8 +1,8 @@
 from fastapi import HTTPException, Depends, Path
-from bson import ObjectId
 from typing import Annotated 
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app import models
+from app import models, engine
 
 
 async def get_room_by_id(room_id: str):
@@ -33,3 +33,8 @@ async def get_event_by_id(event_id: str):
     if not event:
         raise HTTPException(status_code=404, detail="There is no such events")
     return event
+
+
+async def get_session():
+    async with AsyncSession(bind=engine, expire_on_commit=False) as async_session:
+        yield async_session
