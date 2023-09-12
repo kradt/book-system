@@ -1,22 +1,24 @@
 import datetime
-from beanie import Document, Link, BackLink
-from pydantic import Field
-from beanie.odm.operators.find.comparison import GTE, LTE
-from beanie.odm.operators.find.logical import Or, And
-
-from app.tools import PyObjectId
+from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, JSON, ForeignKey
 
 
-class Seat(Document):
+Base = declarative_base()
+
+
+class Seat(Base):
     """
         Model that implement seat in the some room like theatre or cinema
     """
-    row: int
-    column: int
-    number: int 
-    booked: bool = False
-    additional_data: dict | None = None
-    room: BackLink["Room"] = Field(original_field="seats")
+    __tablename__ = "seat"
+    id = Column(Integer, primary_key=True)
+    row = Column(Integer, nullable=False)
+    column = Column(Integer, nullable=False)
+    number = Column(Integer, nullable=False)
+    booked = Column(Boolean, default=False)
+    additional_data = Column(JSON)
+    room_id = Column(Integer, ForeignKey("Room.id"))
+    room = relationship("Room", back_populates="seats")
     
     def book(self):
         if self.booked:
@@ -28,14 +30,14 @@ class Seat(Document):
             self.booked = False
 
 
-class Room(Document):
+class Room(Base):
     """
         Model Room that implement room in the cinema or theatre
     """
-    id: PyObjectId
-    name: str | None = None
-    seats: list[Link[Seat]] | None = None
-    events: list[Link["Event"]] | None = None
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100))
+    seats = relationship("Seat", back_populates="room")
+    events = relationship("Event", back_populates="events")
 
     async def generate_seats(self, rows, columns) -> list[Seat]:
         seats = []
@@ -43,38 +45,28 @@ class Room(Document):
             for col in range(1, columns + 1):
                 number_from_start = (row-1) * columns + col
                 new_seat = Seat(column=col, row=row, number=number_from_start, room=self)
-                await new_seat.create()
                 seats.append(new_seat)
         return seats
     
     async def fill_room_by_seats(self, seats: list[Seat]) -> None:
         self.seats = seats
-        await self.save()
+        # TODO: SAVE DATA TO DB
 
 
-class Event(Document):
+class Event(Base):
     """
         Model that implement specific Event like some perfomance or film
     """
-    id: PyObjectId
-    title: str
-    time_start: datetime.datetime
-    time_finish: datetime.datetime
-    additional_data: dict | None
-    room: BackLink[Room] = Field(original_field="events")
+    id = Column(Integer, primary_key=True)
+    title = Column(String(100))
+    time_start = Column(DateTime)
+    time_finish = Column(DateTime)
+    additional_data = Column(JSON)
+    room_id = Column(Integer, ForeignKey("Room.id"))
+    room = relationship("Room", back_populates="events")
 
-    @classmethod
-    async def time_is_booked(cls, room: Room, time_from: datetime.datetime, time_finish: datetime.timedelta) -> bool:
-        events_in_interval = await Event.find(
-            Or(
-                And(
-                    LTE(Event.time_start, time_from),
-                    GTE(Event.time_finish, time_finish)
-                ),
-                And(
-                    GTE(Event.time_start, time_from),
-                    LTE(Event.time_finish, time_finish)
-            ),
-            Event.room.id == room.id)
-        ).to_list()
-        return events_in_interval
+    def __init__(self) -> None:
+        """
+            #TODO: MAKE CHECK IF TIME IS NOT BOOKED
+        """
+        pass
