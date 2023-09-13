@@ -33,7 +33,6 @@ async def create_event(
         Create new event
     """
     new_event = room_service.create_event(db, db_room, event)
-    print(new_event)
     return new_event
 
 

@@ -68,7 +68,6 @@ def create_event(db, db_room, event: Event):
         Function creating new event with checking available of the room
         IF room already booked in that time, Error will be raised
     """
-
     events_in_interval = db.query(models.Event).filter(
              or_(
                  and_(
@@ -81,7 +80,6 @@ def create_event(db, db_room, event: Event):
              ),
              models.Event.rooms.contains(db_room))
          ).all()
-
     if events_in_interval:
         raise HTTPException(status_code=400, detail="The Room already have event it that time")
     
@@ -90,7 +88,8 @@ def create_event(db, db_room, event: Event):
         time_start=event.time_start, 
         time_finish=event.time_finish, 
         additional_data=event.additional_data)
-    new_event.room = db_room
+    
+    new_event.rooms.append(db_room)
     try:
         db.add(new_event)
         db.commit()
