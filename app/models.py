@@ -35,7 +35,7 @@ class Room(Base):
     """
     __tablename__ = "rooms"
     id = Column(Integer, primary_key=True)
-    name = Column(String(100))
+    name = Column(String(100), unique=True)
     seats = relationship("Seat", back_populates="room")
     events = relationship("Event", back_populates="room")
     __mapper_args__ = {"eager_defaults": True}
@@ -56,15 +56,9 @@ class Event(Base):
     """
     __tablename__ = "events"
     id = Column(Integer, primary_key=True)
-    title = Column(String(100))
+    title = Column(String(100), unique=True)
     time_start = Column(DateTime)
     time_finish = Column(DateTime)
     additional_data = Column(JSON)
     room_id = Column(Integer, ForeignKey("rooms.id"))
     room = relationship("Room", back_populates="events")
-
-    def __init__(self) -> None:
-        """
-            #TODO: MAKE CHECK IF TIME IS NOT BOOKED
-        """
-        pass

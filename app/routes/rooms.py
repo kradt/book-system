@@ -6,6 +6,7 @@ from app.schemas.rooms import Room, Seat
 from app.schemas.seats import SeatCreate, Seat
 from app.schemas.events import Event
 from app.dependencies import get_room_by_id, get_seat_by_number, get_event_by_id, get_db
+from app.services import rooms as room_service
 from app import models
 
 
@@ -31,20 +32,7 @@ async def create_event(
     """
         Create new event
     """
-    if models.Event.time_is_booked(db_room, event.time_start, event.time_finish):
-        raise HTTPException(status_code=400, detail="The Room already have event it that time")
-    
-    new_event = models.Event(
-        title=event.title, 
-        time_start=event.time_start, 
-        time_finish=event.time_finish, 
-        additional_data=event.additional_data)
-    new_event.room = db_room
-    try:
-        db.add(new_event)
-        db.commit()
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=e)
+    new_event = room_service.create_event(db, db_room, event)
     return new_event
 
 
@@ -74,19 +62,7 @@ async def update_seat_data(
         You can update additional data and booking status of seat
         If you want to change other data you should use patch method of room to change all seats
     """
-    if seat.booked:
-        try:
-            if seat.booked == True: db_seat.book()
-            elif seat.booked == False: db_seat.unbook()
-        except ValueError:
-            raise HTTPException(400, "The seat already booked")
-    if seat.additional_data:
-        db_seat.additional_data = seat.additional_data
-    try:
-        db.add(db_seat)
-        db.commit()
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=e)
+    room_service.update_seat(db, db_seat, seat)
     return db_seat
 
 
@@ -116,15 +92,7 @@ async def update_room_info(
     """
         Update room info
     """
-    if room.name:
-        db_room.name = room.name
-    if room.seats:
-        db_room.seats = [models.Seat(**seat.dict(), room=db_room) for seat in room.seats]
-    try:
-        db.add(db_room)
-        db.commit()
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=e)
+    room_service.update_room(db, db_room, room)
     return db_room
 
 
@@ -149,26 +117,9 @@ async def create_new_room(
     """
         Create new room
     """
-    rooms = db.query(models.Room).filter_by(name=room.name).all()
-    if rooms:
-        raise HTTPException(status_code=404, detail="The room with same name already exist")
-    try:
-        new_room = models.Room(name=room.name)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=e)
-    
-    if autogenerate:
-        seats = new_room.generate_seats(columns=columns, rows=rows)
-        db.add_all(seats)
-    else:
-        seats = [models.Seat(**seat.dict()) for seat in room.seats if seat] if room.seats else []
-        db.add_all(seats)
-    new_room.seats = seats
-    try:
-        db.add(new_room)
-        db.commit()
-    except:
-        db.rollback()
+    if autogenerate and not columns or not rows:
+        raise HTTPException(status_code=400, detail="For using autogenerating you have to pass count of columns and rows")
+    new_room = room_service.create_room(db, room, autogenerate, columns, rows)
     return new_room
 
 
