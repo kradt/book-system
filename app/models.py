@@ -1,5 +1,5 @@
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, JSON, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, JSON, ForeignKey, Table
 
 
 Base = declarative_base()
@@ -16,7 +16,7 @@ class Seat(Base):
     number = Column(Integer, nullable=False)
     booked = Column(Boolean, default=False)
     additional_data = Column(JSON)
-    room_id = Column(Integer, ForeignKey("rooms.id"))
+    room_id = Column(Integer, ForeignKey("rooms.id", ondelete='CASCADE'), nullable=False)
     room = relationship("Room", back_populates="seats")
     
     def book(self):
@@ -29,6 +29,13 @@ class Seat(Base):
             self.booked = False
 
 
+room_event = Table(
+    "room_event",
+    Base.metadata,
+    Column("room_id", ForeignKey("rooms.id")),
+    Column("event.id", ForeignKey("events.id"))
+)
+
 class Room(Base):
     """
         Model Room that implement room in the cinema or theatre
@@ -36,9 +43,8 @@ class Room(Base):
     __tablename__ = "rooms"
     id = Column(Integer, primary_key=True)
     name = Column(String(100), unique=True)
-    seats = relationship("Seat", back_populates="room")
-    events = relationship("Event", back_populates="room")
-    __mapper_args__ = {"eager_defaults": True}
+    seats = relationship("Seat", back_populates="room", cascade="save-update, merge, delete, delete-orphan")
+    events = relationship("Event", back_populates="room", secondary=room_event)
 
     def generate_seats(self, rows, columns) -> list[Seat]:
         seats = []
@@ -60,5 +66,4 @@ class Event(Base):
     time_start = Column(DateTime)
     time_finish = Column(DateTime)
     additional_data = Column(JSON)
-    room_id = Column(Integer, ForeignKey("rooms.id"))
-    room = relationship("Room", back_populates="events")
+    room = relationship("Room", back_populates="events", secondary=room_event)

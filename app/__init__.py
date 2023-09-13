@@ -5,5 +5,5 @@ from app.config import DevelopmentConfig
 
 
 config = DevelopmentConfig()
-engine = create_engine(config.DATABASE_URL, echo=True)
+engine = create_engine(config.DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)

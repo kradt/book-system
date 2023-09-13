@@ -111,13 +111,13 @@ async def delete_room(
 async def create_new_room(
         db: Annotated[Session, Depends(get_db)],
         room: Room,
-        autogenerate: Annotated[bool | None, Query(title="If True the seats will be generated before creating")] = None,
+        autogenerate: Annotated[bool | None, Query(title="If True the seats will be generated before creating")] = False,
         columns: Annotated[int | None, Query(title="Amount of columns in the room")] = None,
         rows: Annotated[int | None, Query(title="Amount of rows in the room")] = None):
     """
         Create new room
     """
-    if autogenerate and not columns or not rows:
+    if autogenerate and (not columns or not rows):
         raise HTTPException(status_code=400, detail="For using autogenerating you have to pass count of columns and rows")
     new_room = room_service.create_room(db, room, autogenerate, columns, rows)
     return new_room
@@ -126,6 +126,7 @@ async def create_new_room(
 @router.get("/rooms/{room_id}/", tags=["Rooms"], status_code=status.HTTP_200_OK, response_model=Room)
 async def get_specific_room(db_room: Annotated[models.Room, Depends(get_room_by_id)]):
     """
+    
         Getting specific room 
     """
     return db_room

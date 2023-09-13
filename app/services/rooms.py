@@ -12,7 +12,6 @@ def create_room(db: Session, room: Room, autogenerate: bool = False, columns: in
     """
         Function createing new room and saving it into the database
     """
-
     try:
         new_room = models.Room(name=room.name)
     except IntegrityError:
@@ -37,6 +36,7 @@ def update_room(db: Session, db_room: models.Room, room: Room):
     if room.name:
         db_room.name = room.name
     if room.seats:
+        [db.delete(seat) for seat in db_room.seats]
         db_room.seats = [models.Seat(**seat.dict(), room=db_room) for seat in room.seats]
     try:
         db.add(db_room)
@@ -58,7 +58,7 @@ def update_seat(db, db_seat, seat: Seat):
     try:
         db.add(db_seat)
         db.commit()
-    except Exception:
+    except Exception as e:
         raise HTTPException(status_code=400, detail=e)
     return db_seat
 

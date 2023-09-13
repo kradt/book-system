@@ -5,14 +5,14 @@ from app import models
 
 
 @pytest.mark.asyncio
-async def test_create_new_room(client, room_json):
+async def test_create_new_room(client, db, room_json):
     """
         Testing create new room with seat
     """
     response = await client.post("/rooms/", json=room_json)
     assert response.status_code == 201
     assert room_json == response.json()
-    created_room = await models.Room.find_one({"name": room_json["name"]})
+    created_room = db.query(models.Room).filter_by(name=room_json["name"]).first()
     assert created_room
     assert created_room.seats
 
@@ -40,13 +40,13 @@ async def test_get_all_rooms(client, created_room):
 
 
 @pytest.mark.asyncio
-async def test_delete_specific_room(client, created_room):
+async def test_delete_specific_room(db, client, created_room):
     """
         Testing deleting room by it id
     """
     response = await client.delete(f"/rooms/{created_room.id}/")
     assert response.status_code == 204
-    assert not await models.Room.find_one({"name": created_room.name})
+    assert not db.query(models.Room).filter_by(name=created_room.name).first()
 
 
 @pytest.mark.asyncio
@@ -59,6 +59,7 @@ async def test_patch_query_to_rooms(client, created_room):
     }
     response = await client.patch(f"/rooms/{created_room.id}/", json=first_json_update)
     room = response.json()
+    print("Response", room)
     assert response.status_code == 200
     assert room["name"] == first_json_update["name"]
     assert isinstance(room["seats"], list)
@@ -71,6 +72,7 @@ async def test_patch_query_to_rooms(client, created_room):
     }
     response = await client.patch(f"/rooms/{created_room.id}/", json=second_json_update)
     room = response.json()
+    print("SECOND RESPONSE: ", room)
     assert response.status_code == 200
     assert room["name"] == first_json_update["name"]
     assert isinstance(room["seats"], list)
