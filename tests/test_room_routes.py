@@ -59,7 +59,6 @@ async def test_patch_query_to_rooms(client, created_room):
     }
     response = await client.patch(f"/rooms/{created_room.id}/", json=first_json_update)
     room = response.json()
-    print("Response", room)
     assert response.status_code == 200
     assert room["name"] == first_json_update["name"]
     assert isinstance(room["seats"], list)
@@ -72,7 +71,6 @@ async def test_patch_query_to_rooms(client, created_room):
     }
     response = await client.patch(f"/rooms/{created_room.id}/", json=second_json_update)
     room = response.json()
-    print("SECOND RESPONSE: ", room)
     assert response.status_code == 200
     assert room["name"] == first_json_update["name"]
     assert isinstance(room["seats"], list)
@@ -81,6 +79,9 @@ async def test_patch_query_to_rooms(client, created_room):
 
 @pytest.mark.asyncio
 async def test_get_all_seats_specific_room(client, created_room):
+    """
+        Test getting seats of some room
+    """
     response = await client.get(f"/rooms/{created_room.id}/seats/")
     seats = response.json()
     assert response.status_code == 200
@@ -91,6 +92,9 @@ async def test_get_all_seats_specific_room(client, created_room):
 
 @pytest.mark.asyncio
 async def test_get_specific_seat_by_id(client, created_room):
+    """
+        Test getting specific seat by it id
+    """
     response = await client.get(f"/rooms/{created_room.id}/seats/{created_room.seats[0].number}/")
     seat = response.json()
     assert response.status_code == 200
@@ -100,6 +104,9 @@ async def test_get_specific_seat_by_id(client, created_room):
 
 @pytest.mark.asyncio
 async def test_update_specific_seat(client, created_room):
+    """
+        Test updating seat data
+    """
     first_json_update = {
         "booked": True,
     }
@@ -121,17 +128,29 @@ async def test_update_specific_seat(client, created_room):
 
 @pytest.mark.asyncio
 async def test_get_all_events_specific_room_by_room_id(client, created_room):
+    """
+        Test getting all event events of some room
+    """
     pass
 
 
 @pytest.mark.asyncio
-async def create_event_for_specific_room(client, created_room):
+async def test_create_event_for_specific_room(client, db, created_room):
+    """
+        Test creating event for specific room
+    """
     body = {
         "title": "The Big Lebovski",
-        "time_start": datetime.datetime(2022, 1, 2, 13, 00),
-        "time_finish": datetime.datetime(2022, 1, 2, 14, 00)
+        "time_start": str(datetime.datetime(2022, 1, 2, 13, 00)),
+        "time_finish": str(datetime.datetime(2022, 1, 2, 14, 00))
     }
     response = await client.post(f"/rooms/{created_room.id}/events/", json=body)
     print(response.json())
     assert response.status_code == 201
+    event_in_base = db.query(models.Event).filter_by(title=body["title"])
+    assert event_in_base.title == response.title
+    assert event_in_base.time_start == response.time_start
+    assert event_in_base.time_finish == response.time_finish
+
+
 

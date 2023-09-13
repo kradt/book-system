@@ -33,6 +33,7 @@ async def create_event(
         Create new event
     """
     new_event = room_service.create_event(db, db_room, event)
+    print(new_event)
     return new_event
 
 
@@ -126,7 +127,7 @@ async def create_new_room(
 @router.get("/rooms/{room_id}/", tags=["Rooms"], status_code=status.HTTP_200_OK, response_model=Room)
 async def get_specific_room(db_room: Annotated[models.Room, Depends(get_room_by_id)]):
     """
-    
+
         Getting specific room 
     """
     return db_room

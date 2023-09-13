@@ -72,14 +72,14 @@ def create_event(db, db_room, event: Event):
     events_in_interval = db.query(models.Event).filter(
              or_(
                  and_(
-                     Event.time_start <= event.time_from,
-                     Event.time_finish >= event.time_finish
+                     models.Event.time_start <= event.time_start,
+                     models.Event.time_finish >= event.time_finish
                  ),
                  and_(
-                     Event.time_start >= event.time_from,
-                     Event.time_finish <= event.time_finish
+                     models.Event.time_start >= event.time_start,
+                     models.Event.time_finish <= event.time_finish
              ),
-             Event.room.id == db_room.id)
+             models.Event.rooms.contains(db_room))
          ).all()
 
     if events_in_interval:
