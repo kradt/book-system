@@ -38,6 +38,7 @@ class Room(Base):
     name = Column(String(100))
     seats = relationship("Seat", back_populates="room")
     events = relationship("Event", back_populates="room")
+    __mapper_args__ = {"eager_defaults": True}
 
     def generate_seats(self, rows, columns) -> list[Seat]:
         seats = []
@@ -47,9 +48,6 @@ class Room(Base):
                 new_seat = Seat(column=col, row=row, number=number_from_start, room=self)
                 seats.append(new_seat)
         return seats
-    
-    async def fill_room_by_seats(self, seats: list[Seat]) -> None:
-        self.seats = seats
 
 
 class Event(Base):

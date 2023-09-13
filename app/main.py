@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from motor.motor_asyncio import AsyncIOMotorClient
 
 from app import models, config, engine
 from app.routes import rooms
@@ -11,11 +10,11 @@ app.include_router(rooms.router)
 
 
 @app.on_event("startup")
-async def startup_db_client():
-    async with engine.begin() as conn:
-        await conn.run_sync(models.Base.metadata.create_all)
+def startup_db_client():
+    models.Base.metadata.create_all(bind=engine)
 
 
 @app.on_event("shutdown")
-async def shutdown_db_client():
+def shutdown_db_client():
     pass
+    

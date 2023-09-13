@@ -1,12 +1,9 @@
-import databases
-import sqlalchemy
-from sqlalchemy.orm import create_session, sessionmaker
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
 
 from app.config import DevelopmentConfig
 
 
 config = DevelopmentConfig()
-
-engine = create_async_engine(config.DATABASE_URL, echo=True)
-# Expite on commit if true session won't use queries to already commited items
+engine = create_engine(config.DATABASE_URL, echo=True)
+SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
