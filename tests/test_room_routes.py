@@ -10,11 +10,17 @@ async def test_create_new_room(client, db, room_json):
         Testing create new room with seat
     """
     response = await client.post("/rooms/", json=room_json)
+    response_json = response.json()
     assert response.status_code == 201
-    assert room_json == response.json()
+    assert room_json["name"] == response_json["name"]
     created_room = db.query(models.Room).filter_by(name=room_json["name"]).first()
     assert created_room
     assert created_room.seats
+    assert created_room.events
+
+    response = await client.delete(f"/rooms/{created_room.id}/")
+    assert response.status_code == 204
+    assert not db.query(models.Room).filter_by(name=created_room.name).first()
 
 
 @pytest.mark.asyncio
@@ -23,6 +29,7 @@ async def test_get_room_by_id(client, created_room):
         Testing getting room by it id
     """
     room = await client.get(f"/rooms/{created_room.id}/")
+    print(room.json())
     assert room.status_code == 200
     assert "name", "seats" in room.json()
 
@@ -37,16 +44,6 @@ async def test_get_all_rooms(client, created_room):
     assert response.status_code == 200
     assert "name", "seats" in rooms 
     assert isinstance(rooms, list)
-
-
-@pytest.mark.asyncio
-async def test_delete_specific_room(db, client, created_room):
-    """
-        Testing deleting room by it id
-    """
-    response = await client.delete(f"/rooms/{created_room.id}/")
-    assert response.status_code == 204
-    assert not db.query(models.Room).filter_by(name=created_room.name).first()
 
 
 @pytest.mark.asyncio
@@ -141,16 +138,20 @@ async def test_create_event_for_specific_room(client, db, created_room):
     """
     body = {
         "title": "The Big Lebovski",
-        "time_start": str(datetime.datetime(2022, 1, 2, 13, 00)),
-        "time_finish": str(datetime.datetime(2022, 1, 2, 14, 00))
+        "time_start": datetime.datetime.now().isoformat(),
+        "time_finish": datetime.datetime.now().isoformat(),
+        "additional_data": {}
     }
     response = await client.post(f"/rooms/{created_room.id}/events/", json=body)
-    print(response.json())
+    response_json = response.json()
+    print(response_json)
     assert response.status_code == 201
-    event_in_base = db.query(models.Event).filter_by(title=body["title"])
-    assert event_in_base.title == response.title
-    assert event_in_base.time_start == response.time_start
-    assert event_in_base.time_finish == response.time_finish
+    event_in_base = db.query(models.Event).filter_by(title=body["title"]).first()
+    assert event_in_base.title == response_json["title"]
+    assert event_in_base.time_start.isoformat() == response_json["time_start"]
+    assert event_in_base.time_finish.isoformat() == response_json["time_finish"]
 
-
-
+    response = await client.delete(f"/events/{event_in_base.id}/")
+    assert response.status_code == 204
+    event_in_base = db.query(models.Event).filter_by(title=body["title"]).first()
+    assert not event_in_base

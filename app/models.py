@@ -44,7 +44,7 @@ class Room(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(100), unique=True)
     seats = relationship("Seat", back_populates="room", cascade="save-update, merge, delete, delete-orphan")
-    events = relationship("Event", back_populates="rooms", secondary=room_event)
+    events = relationship("Event", back_populates="rooms", secondary=room_event, cascade="all, delete")
 
     def generate_seats(self, rows, columns) -> list[Seat]:
         seats = []
@@ -66,4 +66,4 @@ class Event(Base):
     time_start = Column(DateTime)
     time_finish = Column(DateTime)
     additional_data = Column(JSON)
-    rooms = relationship("Room", back_populates="events", secondary=room_event)
+    rooms = relationship("Room", back_populates="events", secondary=room_event, cascade="all, delete")

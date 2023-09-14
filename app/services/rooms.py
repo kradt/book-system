@@ -2,7 +2,7 @@ from app import models
 from app.schemas.rooms import Room
 from app.schemas.seats import Seat
 from app.schemas.events import Event
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, between
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
@@ -16,7 +16,6 @@ def create_room(db: Session, room: Room, autogenerate: bool = False, columns: in
         new_room = models.Room(name=room.name)
     except IntegrityError:
         raise HTTPException(status_code=400, detail="The room with the same name alreadt exist")
-    
     if autogenerate:
         seats = new_room.generate_seats(columns=columns, rows=rows)
         db.add_all(seats)
@@ -24,6 +23,8 @@ def create_room(db: Session, room: Room, autogenerate: bool = False, columns: in
         seats = [models.Seat(**seat.dict()) for seat in room.seats if seat] if room.seats else []
         db.add_all(seats)
     new_room.seats = seats
+    events = [models.Event(**event.dict()) for event in room.events] if room.events else []
+    new_room.events = events
     try:
         db.add(new_room)
         db.commit()
@@ -67,19 +68,23 @@ def create_event(db, db_room, event: Event):
     """
         Function creating new event with checking available of the room
         IF room already booked in that time, Error will be raised
+
+        For example if i will use '|' for mark a interval we can imagine some intervals
+        event_in_base:       |                  |
+        event_to_base: |                   |
+        event_to_base               |                 |
+        
+        So, we can see that time to add can start before start time and base and can finish before time finish in base, so we should check it
     """
     events_in_interval = db.query(models.Event).filter(
+        and_(
              or_(
-                 and_(
-                     models.Event.time_start <= event.time_start,
-                     models.Event.time_finish >= event.time_finish
-                 ),
-                 and_(
-                     models.Event.time_start >= event.time_start,
-                     models.Event.time_finish <= event.time_finish
+                between(models.Event.time_start, event.time_start, event.time_finish),
+                between(models.Event.time_finish, event.time_start, event.time_finish)
              ),
-             models.Event.rooms.contains(db_room))
-         ).all()
+             models.Event.rooms.contains(db_room)
+    )).all()
+
     if events_in_interval:
         raise HTTPException(status_code=400, detail="The Room already have event it that time")
     

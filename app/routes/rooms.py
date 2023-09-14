@@ -20,11 +20,12 @@ async def delete_event_by_id(
     """
         Deleting specific event using it id
     """
+    print(event)
     db.delete(event)
     db.commit()
 
 
-@router.post("/room/{room_id}/events/", tags=["Events"], status_code=201, response_model=Event)
+@router.post("/rooms/{room_id}/events/", tags=["Events"], status_code=201, response_model=Event)
 async def create_event(
         db: Annotated[Session, Depends(get_db)],
         db_room: Annotated[models.Room, Depends(get_room_by_id)],
@@ -44,7 +45,7 @@ def get_specific_event_by_id(event: Annotated[Event, Depends(get_event_by_id)]):
     return event
 
 
-@router.get("/room/{room_id}/events/", tags=["Events"], status_code=200, response_model=list[Event] | None)
+@router.get("/rooms/{room_id}/events/", tags=["Events"], status_code=200, response_model=list[Event] | None)
 def get_all_event(db_room: Annotated[models.Room, Depends(get_room_by_id)]):
     """
         Get all events specific room
@@ -126,7 +127,6 @@ async def create_new_room(
 @router.get("/rooms/{room_id}/", tags=["Rooms"], status_code=status.HTTP_200_OK, response_model=Room)
 async def get_specific_room(db_room: Annotated[models.Room, Depends(get_room_by_id)]):
     """
-
         Getting specific room 
     """
     return db_room

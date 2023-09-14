@@ -13,8 +13,7 @@ class Event(BaseModel):
     title: str
     time_start: datetime.datetime
     time_finish: datetime.datetime
-    additional_data: dict
+    additional_data: dict | None = None
 
     class Config:
         orm_mode = True
-

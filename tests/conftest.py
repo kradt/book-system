@@ -1,8 +1,8 @@
 import pytest
-from bson import ObjectId
+import datetime
 from asgi_lifespan import LifespanManager
 from httpx import AsyncClient
-from app import models, SessionLocal
+from app import models
 from app.main import app
 from app.dependencies import get_db
 
@@ -25,17 +25,17 @@ def room_json(db):
         "seats": [
             {"row": 1, "column": 1, "number": 1, 'booked': False, 'additional_data': None}
             ],
-        "events": []
-    }
+        "events": [
+            {"title": "The Film",
+            "time_start": datetime.datetime(2020, 2, 1, 22, 30).isoformat(),
+            "time_finish": datetime.datetime(2020, 2, 1, 23, 30).isoformat()
+            }]
+        }
     yield necessary_dict
-    room_in_base = db.query(models.Room).filter_by(name=necessary_dict["name"]).first()
-    if room_in_base:
-        db.delete(room_in_base)
-        db.commit()
 
 
 @pytest.fixture(scope="function")
-def created_room(client, db, room_json):
+def created_room(db, room_json):
     seats = [models.Seat(**seat) for seat in room_json["seats"]]
     events = [models.Event(**event) for event in room_json["events"]]
 
@@ -46,7 +46,8 @@ def created_room(client, db, room_json):
     db.add(room)
     db.commit()
     yield room
-    for seat in room.seats:
-        db.delete(seat)
-    db.delete(room)
-    db.commit()
+    try:
+        db.delete(room)
+        db.commit()
+    except Exception:
+        pass
