@@ -12,19 +12,22 @@ def create_room(db: Session, room: Room, autogenerate: bool = False, columns: in
     """
         Function createing new room and saving it into the database
     """
+
+    new_room = models.Room(name=room.name)
+    
     if autogenerate:
         seats = new_room.generate_seats(columns=columns, rows=rows)
     else:
         seats = [models.Seat(**seat.dict()) for seat in room.seats if seat] if room.seats else []
+
     events = [models.Event(**event.dict()) for event in room.events] if room.events else []
-    try:
-        new_room = models.Room(name=room.name, seats=seats, events=events)
-    except IntegrityError:
-        raise HTTPException(status_code=400, detail="The room with the same name alreadt exist")
+    new_room.events = events
+    new_room.seats = seats
     try:
         db.add(new_room)
         db.commit()
-    except:
+    except IntegrityError:
+        raise HTTPException(status_code=400, detail="The room with the same name alreadt exist")
         db.rollback()
     return new_room
 
@@ -52,11 +55,8 @@ def update_seat(db, db_seat, seat: Seat):
             raise HTTPException(400, "The seat already booked")
     if seat.additional_data:
         db_seat.additional_data = seat.additional_data
-    try:
-        db.add(db_seat)
-        db.commit()
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=e)
+    db.add(db_seat)
+    db.commit()
     return db_seat
 
 

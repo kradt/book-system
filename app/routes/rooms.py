@@ -20,7 +20,6 @@ async def delete_event_by_id(
     """
         Deleting specific event using it id
     """
-    print(event)
     db.delete(event)
     db.commit()
 
