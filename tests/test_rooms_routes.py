@@ -1,5 +1,4 @@
 import pytest
-import datetime
 
 from app import models
 
@@ -39,7 +38,6 @@ async def test_create_new_room_autogenerate(client, db, room_json):
     response = await client.delete(f"/rooms/{room_in_base.id}/")
     assert response.status_code == 204
     assert not db.query(models.Room).filter_by(name=room_in_base.name).first()
-
 
 
 @pytest.mark.asyncio
@@ -112,6 +110,7 @@ async def test_patch_query_to_rooms(client, created_room):
     assert room["name"] == first_json_update["name"]
     assert isinstance(room["seats"], list)
     assert len(room["seats"]) == 1
+
     second_json_update = {
         "seats": [
                 {"row": 1, "column": 1, "number": 1},
@@ -124,3 +123,23 @@ async def test_patch_query_to_rooms(client, created_room):
     assert room["name"] == first_json_update["name"]
     assert isinstance(room["seats"], list)
     assert len(room["seats"]) == 2
+
+
+@pytest.mark.asyncio
+async def test_patch_query_to_rooms_with_alredy_exsiting_name(client, db, created_room):
+    """
+        Testing pathing room by id with exsisting name
+    """
+    name = "NEW TEST NAME"
+    await client.post(f"/rooms/", json={"name": name})
+    first_json_update = {
+        "name": name
+    }
+    response = await client.patch(f"/rooms/{created_room.id}/", json=first_json_update)
+    room = response.json()
+    assert response.status_code == 400
+    assert room["detail"] == "The room with the same name alreadt exist"
+
+    room = db.query(models.Room).filter_by(name=name).first()
+    await client.delete(f"/rooms/{room.id}")
+

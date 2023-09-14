@@ -12,7 +12,6 @@ def create_room(db: Session, room: Room, autogenerate: bool = False, columns: in
     """
         Function createing new room and saving it into the database
     """
-
     new_room = models.Room(name=room.name)
     
     if autogenerate:
@@ -28,7 +27,6 @@ def create_room(db: Session, room: Room, autogenerate: bool = False, columns: in
         db.commit()
     except IntegrityError:
         raise HTTPException(status_code=400, detail="The room with the same name alreadt exist")
-        db.rollback()
     return new_room
 
 
@@ -70,7 +68,7 @@ def create_event(db, db_room, event: Event):
         event_to_base: |                   |
         event_to_base               |                 |
         
-        So, we can see that time to add can start before start time and base and can finish before time finish in base, so we should check it
+        So, we can see that time to add can start before start time in base and can finish before time finish in base, so we should check it
     """
     events_in_interval = db.query(models.Event).filter(
         and_(
