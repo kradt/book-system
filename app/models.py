@@ -18,6 +18,7 @@ class Seat(Base):
     additional_data = Column(JSON)
     room_id = Column(Integer, ForeignKey("rooms.id", ondelete='CASCADE'), nullable=False)
     room = relationship("Room", back_populates="seats")
+    __mapper_args__ = {'confirm_deleted_rows': False}
     
     def book(self):
         if self.booked:

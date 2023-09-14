@@ -109,7 +109,6 @@ async def test_update_specific_seat(client, created_room):
     }
     response = await client.patch(f"/rooms/{created_room.id}/seats/{created_room.seats[0].number}/", json=first_json_update)
     seat = response.json()
-    print(seat)
     assert response.status_code == 200
     assert seat["booked"] == first_json_update["booked"]
 
@@ -144,7 +143,6 @@ async def test_create_event_for_specific_room(client, db, created_room):
     }
     response = await client.post(f"/rooms/{created_room.id}/events/", json=body)
     response_json = response.json()
-    print(response_json)
     assert response.status_code == 201
     event_in_base = db.query(models.Event).filter_by(title=body["title"]).first()
     assert event_in_base.title == response_json["title"]

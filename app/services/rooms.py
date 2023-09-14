@@ -12,19 +12,15 @@ def create_room(db: Session, room: Room, autogenerate: bool = False, columns: in
     """
         Function createing new room and saving it into the database
     """
-    try:
-        new_room = models.Room(name=room.name)
-    except IntegrityError:
-        raise HTTPException(status_code=400, detail="The room with the same name alreadt exist")
     if autogenerate:
         seats = new_room.generate_seats(columns=columns, rows=rows)
-        db.add_all(seats)
     else:
         seats = [models.Seat(**seat.dict()) for seat in room.seats if seat] if room.seats else []
-        db.add_all(seats)
-    new_room.seats = seats
     events = [models.Event(**event.dict()) for event in room.events] if room.events else []
-    new_room.events = events
+    try:
+        new_room = models.Room(name=room.name, seats=seats, events=events)
+    except IntegrityError:
+        raise HTTPException(status_code=400, detail="The room with the same name alreadt exist")
     try:
         db.add(new_room)
         db.commit()
