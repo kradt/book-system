@@ -47,12 +47,12 @@ def update_room(db: Session, db_room: models.Room, room: Room):
 
 
 def update_seat(db, db_seat, seat: Seat):
-    if seat.booked:
-        try:
-            if seat.booked == True: db_seat.book()
-            elif seat.booked == False: db_seat.unbook()
-        except ValueError:
-            raise HTTPException(400, "The seat already booked")
+    if db_seat.booked and seat.booked:
+        raise HTTPException(400, "The seat already booked")
+    
+    if seat.booked in [True, False]:
+        db_seat.booked = seat.booked
+
     if seat.additional_data:
         db_seat.additional_data = seat.additional_data
     db.add(db_seat)

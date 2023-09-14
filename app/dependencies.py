@@ -33,6 +33,8 @@ def get_seat_by_number(
         Depends that using for getting specific seat
     """
     seat = db.query(models.Seat).filter_by(room_id=db_room.id, number=seat_number).first()
+    if not seat:
+        raise HTTPException(status_code=404, detail="There is no such seat")
     return seat
 
 
@@ -44,5 +46,5 @@ def get_event_by_id(
     """
     event = db.query(models.Event).filter_by(id=event_id).first()
     if not event:
-        raise HTTPException(status_code=404, detail="There is no such events")
+        raise HTTPException(status_code=404, detail="There is no such event")
     return event

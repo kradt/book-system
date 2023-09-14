@@ -92,7 +92,7 @@ async def test_getting_specific_undefind_event(client, db):
     response = await client.get(f"/events/{event_id}/")
     event_data = response.json()
     assert response.status_code == 404
-    assert event_data["detail"] == "There is no such events"
+    assert event_data["detail"] == "There is no such event"
     event_in_base = db.query(models.Event).filter_by(id=event_id).first()
     assert not event_in_base
 
