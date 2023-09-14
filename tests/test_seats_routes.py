@@ -53,9 +53,12 @@ async def test_book_specific_seat(client, db, created_room):
     assert response.status_code == 200
     assert seat["booked"] == json_update["booked"]
 
-    seat_in_base = db.query(models.Seat).filter_by(number=created_room.seats[0].number).first()
-    print("IN BASE:", seat_in_base.booked)
-    print("JSON", seat["booked"])
+    seat_in_base = db.query(models.Seat).filter(
+        models.Seat.number==created_room.seats[0].number,
+        models.Seat.room_id==created_room.id
+    ).first()
+
+    db.refresh(seat_in_base)
     assert seat_in_base.number == seat["number"]
     assert seat["booked"] == seat_in_base.booked
 
@@ -68,13 +71,20 @@ async def test_book_specific_seat(client, db, created_room):
     assert seat["detail"] == "The seat already booked"
     assert db.query(models.Seat).filter_by(id=created_room.seats[0].id).first().booked
 
+
+@pytest.mark.asyncio
+async def test_unbook_specific_seat(client, db, created_room):
+    """
+        Test unbook specific seat
+    """
     json_update = {
         "booked": False
     }
     response = await client.patch(f"/rooms/{created_room.id}/seats/{created_room.seats[0].number}/", json=json_update)
-    seat = response.json()
     assert response.status_code == 200
-    assert not db.query(models.Seat).filter_by(id=created_room.seats[0].id).first().booked
+    seat_in_base = db.query(models.Seat).filter_by(id=created_room.seats[0].id).first()
+    db.refresh(seat_in_base)
+    assert not seat_in_base.booked
 
 
 @pytest.mark.asyncio
@@ -86,4 +96,3 @@ async def test_update_additional_data_of_specific_seat(client, db, created_room)
     seat = response.json()
     assert response.status_code == 200
     assert seat["additional_data"] == json_update["additional_data"]
-

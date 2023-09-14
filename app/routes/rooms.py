@@ -62,8 +62,9 @@ async def update_seat_data(
         You can update additional data and booking status of seat
         If you want to change other data you should use patch method of room to change all seats
     """
-    room = room_service.update_seat(db, db_seat, seat)
-    return room
+    db_seat = room_service.update_seat(db, db_seat, seat)
+    print("IN ROUTE: ", db_seat.booked)
+    return db_seat
 
 
 @router.get("/rooms/{room_id}/seats/{seat_number}/", tags=["Seats"], status_code=200, response_model=Seat)
