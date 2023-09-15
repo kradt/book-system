@@ -1,11 +1,14 @@
 from fastapi import FastAPI
 
-from app import models, config, engine
-from app.routes import rooms
+from app import models, engine
+from app.routes import rooms, events, seats
 
 
 app = FastAPI(title="Booking API system")
 
+
+app.include_router(events.router)
+app.include_router(seats.router)
 app.include_router(rooms.router)
 
 
@@ -17,4 +20,3 @@ def startup_db_client():
 @app.on_event("shutdown")
 def shutdown_db_client():
     pass
-    

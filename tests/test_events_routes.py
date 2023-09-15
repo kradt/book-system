@@ -34,7 +34,6 @@ async def test_create_event_for_specific_room(client, db, created_room):
     assert event_in_base.title == response_json["title"]
     assert event_in_base.time_start.isoformat() == response_json["time_start"]
     assert event_in_base.time_finish.isoformat() == response_json["time_finish"]
-
     response = await client.delete(f"/events/{event_in_base.id}/")
     assert response.status_code == 204
     event_in_base = db.query(models.Event).filter_by(title=body["title"]).first()

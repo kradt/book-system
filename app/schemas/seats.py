@@ -18,7 +18,6 @@ class Seat(SeatCreate):
         :param column: number of column in columns
         :param row: number of row in rows
         :param number: seat number
-        
     """
     column: int = Field(gt=0)
     row: int = Field(gt=0)

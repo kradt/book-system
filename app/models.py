@@ -20,12 +20,14 @@ class Seat(Base):
     room = relationship("Room", back_populates="seats")
     __mapper_args__ = {'confirm_deleted_rows': False}
 
+
 room_event = Table(
     "room_event",
     Base.metadata,
     Column("room_id", ForeignKey("rooms.id")),
     Column("event.id", ForeignKey("events.id"))
 )
+
 
 class Room(Base):
     """

@@ -2,7 +2,6 @@ import datetime
 from pydantic import BaseModel
 
 
-
 class Event(BaseModel):
     """
         :param title: Title of event

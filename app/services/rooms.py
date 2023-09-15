@@ -1,16 +1,20 @@
-from app import models
-from app.schemas.rooms import Room
-from app.schemas.seats import Seat
-from app.schemas.events import Event
-from sqlalchemy import or_, and_, between
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-from fastapi import HTTPException
+from fastapi import HTTPException, status
+
+from app import models
+from app.schemas.rooms import Room
 
 
-def create_room(db: Session, room: Room, autogenerate: bool = False, columns: int = 0, rows: int = 0):
+def create_room(db: Session, room: Room, autogenerate: bool = False, columns: int = 0, rows: int = 0) -> models.Room:
     """
-        Function createing new room and saving it into the database
+        Room create function
+
+        :param db: database session
+        :param room: room from request body converted to pydantic model object
+        :param autogenerate: if true the seats will be generated automatically
+        :param columns: necessary count of columns of seats that will be generated
+        :param rows: necessary count of rows of seats that will be generated
     """
     new_room = models.Room(name=room.name)
     
@@ -26,11 +30,18 @@ def create_room(db: Session, room: Room, autogenerate: bool = False, columns: in
         db.add(new_room)
         db.commit()
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="The room with the same name alreadt exist")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="The room with the same name alreadt exist")
     return new_room
 
 
-def update_room(db: Session, db_room: models.Room, room: Room):
+def update_room(db: Session, db_room: models.Room, room: Room) -> models.Room:
+    """
+        Room update function
+        
+        :param db: database session
+        :param db_room: room from database
+        :param room: room from request body converted to pydantic model object
+    """
     if room.name:
         db_room.name = room.name
     if room.seats:
@@ -40,58 +51,5 @@ def update_room(db: Session, db_room: models.Room, room: Room):
         db.add(db_room)
         db.commit()
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="The room with the same name alreadt exist")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="The room with the same name alreadt exist")
     return db_room
-
-
-def update_seat(db, db_seat, seat: Seat):
-    if db_seat.booked and seat.booked:
-        raise HTTPException(400, "The seat already booked")
-    
-    if seat.booked in [True, False]:
-        db_seat.booked = seat.booked
-
-    if seat.additional_data:
-        db_seat.additional_data = seat.additional_data
-    db.add(db_seat)
-    db.commit()
-    return db_seat
-
-
-def create_event(db, db_room, event: Event):
-    """
-        Function creating new event with checking available of the room
-        IF room already booked in that time, Error will be raised
-
-        For example if i will use '|' for mark a interval we can imagine some intervals
-        event_in_base:       |                  |
-        event_to_base: |                   |
-        event_to_base               |                 |
-        
-        So, we can see that time to add can start before start time in base and can finish before time finish in base, so we should check it
-    """
-    events_in_interval = db.query(models.Event).filter(
-        and_(
-             or_(
-                between(models.Event.time_start, event.time_start, event.time_finish),
-                between(models.Event.time_finish, event.time_start, event.time_finish)
-             ),
-             models.Event.rooms.contains(db_room)
-    )).all()
-
-    if events_in_interval:
-        raise HTTPException(status_code=400, detail="The Room already have event it that time")
-    
-    new_event = models.Event(
-        title=event.title, 
-        time_start=event.time_start, 
-        time_finish=event.time_finish, 
-        additional_data=event.additional_data)
-    
-    new_event.rooms.append(db_room)
-    try:
-        db.add(new_event)
-        db.commit()
-    except IntegrityError:
-        raise HTTPException(status_code=400, detail="The event with the same name already exist")
-    return new_event

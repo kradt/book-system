@@ -1,8 +1,7 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from app.schemas.seats import Seat
 from app.schemas.events import Event
-
 
 
 class Room(BaseModel):
