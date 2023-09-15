@@ -30,8 +30,7 @@ async def create_event(
     """
         Create new event
     """
-    new_event = event_service.create_event(db, db_room, event)
-    return new_event
+    return event_service.create_event(db, db_room, event)
 
 
 @router.get("/events/{event_id}/", status_code=status.HTTP_200_OK, response_model=Event | None)

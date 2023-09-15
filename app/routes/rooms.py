@@ -22,8 +22,7 @@ async def update_room_info(
     """
         Update room info
     """
-    room_service.update_room(db, db_room, room)
-    return db_room
+    return room_service.update_room(db, db_room, room)
 
 
 @router.delete("/rooms/{room_id}/", status_code=status.HTTP_204_NO_CONTENT)
@@ -49,8 +48,7 @@ async def create_new_room(
     """
     if autogenerate and (not columns or not rows):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="For using autogenerating you have to pass count of columns and rows")
-    new_room = room_service.create_room(db, room, autogenerate, columns, rows)
-    return new_room
+    return room_service.create_room(db, room, autogenerate, columns, rows)
 
 
 @router.get("/rooms/{room_id}/", status_code=status.HTTP_200_OK, response_model=Room)
