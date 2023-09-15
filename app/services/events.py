@@ -27,19 +27,23 @@ def create_event(db: Session, db_room: models.Room, event: Event) -> models.Even
                 between(models.Event.time_start, event.time_start, event.time_finish),
                 between(models.Event.time_finish, event.time_start, event.time_finish)
              ),
-             models.Event.rooms.contains(db_room)
+             models.Event.room == db_room
     )).all()
 
     if events_in_interval:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="The Room already have event it that time")
     
+    new_performance = models.Performance(
+         title=event.title, 
+         additional_data=event.additional_data
+    )
     new_event = models.Event(
-        title=event.title, 
         time_start=event.time_start, 
-        time_finish=event.time_finish, 
-        additional_data=event.additional_data)
-    
-    new_event.rooms.append(db_room)
+        time_finish=event.time_finish
+    )
+    new_event.performance = new_performance
+    new_event.room = db_room
+
     try:
         db.add(new_event)
         db.commit()

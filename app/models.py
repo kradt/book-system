@@ -1,4 +1,5 @@
 from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, JSON, ForeignKey, Table
 
 
@@ -21,23 +22,36 @@ class Seat(Base):
     __mapper_args__ = {'confirm_deleted_rows': False}
 
 
-room_event = Table(
-    "room_event",
-    Base.metadata,
-    Column("room_id", ForeignKey("rooms.id")),
-    Column("event.id", ForeignKey("events.id"))
-)
+class Event(Base):
+    __tablename__ = "events"
+
+    room_id = Column(Integer, ForeignKey("rooms.id"))
+    event_id = Column(Integer, ForeignKey("performances.id"))
+    time_start = Column(DateTime, nullable=False)
+    time_finish = Column(DateTime, nullable=False)
+    room = relationship("Room", back_populates="events")
+    performance = relationship("Performance", back_populates="rooms")
 
 
 class Room(Base):
     """
         Model Room that implement room in the cinema or theatre
+        so, about events field i have a discussion with myself about right way
+        
+        for example:
+            We have film A and Room B
+            Film A many times perform in the Room B
+            so, question in how right save this data
+            We add new Event to Room.events every time now,
+            but when we add the same events but in different time it is not very good because in fact it is the same objects
+
+        to solve it we can create association table with additional fields where we put time_start and time_finish of event
     """
     __tablename__ = "rooms"
     id = Column(Integer, primary_key=True)
     name = Column(String(100), unique=True)
     seats = relationship("Seat", back_populates="room", cascade="save-update, merge, delete, delete-orphan")
-    events = relationship("Event", back_populates="rooms", secondary=room_event, cascade="all, delete")
+    events = relationship("Event", back_populates="room", cascade="all, delete")
 
     def generate_seats(self, rows, columns) -> list[Seat]:
         seats = []
@@ -49,14 +63,14 @@ class Room(Base):
         return seats
 
 
-class Event(Base):
+class Performance(Base):
     """
         Model that implement specific Event like some perfomance or film
     """
-    __tablename__ = "events"
+    __tablename__ = "performances"
     id = Column(Integer, primary_key=True)
     title = Column(String(100), unique=True)
-    time_start = Column(DateTime)
-    time_finish = Column(DateTime)
+    time_start = Column(DateTime, nullable=False)
+    time_finish = Column(DateTime, nullable=False)
     additional_data = Column(JSON)
-    rooms = relationship("Room", back_populates="events", secondary=room_event, cascade="all, delete")
+    rooms = relationship("Event", back_populates="performance", cascade="all, delete")
