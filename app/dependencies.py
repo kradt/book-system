@@ -15,7 +15,7 @@ def get_db() -> Session:
 
 def get_room_by_id(
         db: Annotated[Session, Depends(get_db)],
-        room_id: Annotated[int, Path(title="ID of room")] | Annotated[int, Query(title="ID of room")]) -> models.Room:
+        room_id: Annotated[int, Path(title="ID of room")] | Annotated[int | None, Query(title="ID of room")]) -> models.Room:
     """
         Depends that useing for getting specific room
     """
@@ -40,7 +40,7 @@ def get_seat_by_number(
 
 def get_event_by_id(
         db: Annotated[Session, Depends(get_db)],
-        event_id: str) -> models.Event:
+        event_id: Annotated[int, Path(title="ID of event")] | Annotated[int | None, Query(title="ID of event")]) -> models.Event:
     """
         Depends that using for getting event by id
     """

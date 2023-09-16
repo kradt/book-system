@@ -53,5 +53,10 @@ def create_booking(db: Session, booking: Booking):
     return new_booking
     
 
-def get_all_booking_of_specific_room(db: Session, db_room: models.Room):
-    return db.query(models.Booking).filter_by(room=db_room).all()
+def get_all_booking_of_specific_room(db: Session, room_id: int | None = None, event_id: int | None = None):
+    filter_properties = {}
+    if room_id:
+        filter_properties["room_id"] = room_id
+    if event_id:
+        filter_properties["event_id"] = room_id
+    return db.query(models.Booking).filter_by(**filter_properties).all()
