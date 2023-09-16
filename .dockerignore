@@ -1,0 +1,10 @@
+**/__pycache__
+**/.mypy_cache
+**/venv
+.DS_Store
+.idea
+wsgi.py
+LICENCSE
+README.md
+.gitignore
+run.py
