@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
 from app.schemas.booking import Booking, BaseBooking
+from app.utills import is_exist
 from app import models
 
 
@@ -37,15 +38,12 @@ def create_booking(db: Session, booking: Booking):
         So, we can see that time to add can start before time_start in base and can finish before time_finish in base, so we should check it
     """
     db_room = db.query(models.Room).filter_by(id=booking.room_id).first()
-    if not db_room:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="The room with this id doesn't exist")
-    
+    is_exist(db_room, detail="The room with this id doesn't exist")
     db_event = db.query(models.Event).filter_by(id=booking.event_id).first()
-    if not db_event:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="The event with this id doesn't exist")
+    is_exist(db_event, detail="The event with this id doesn't exist")
 
     if is_time_booked(db, time_start=booking.time_start, time_finish=booking.time_finish, room_id=db_room.id):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="The Room already have event it that time")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="The Room has already had event it that time")
     
     new_booking = models.Booking(
         time_start=booking.time_start, 
@@ -59,7 +57,10 @@ def create_booking(db: Session, booking: Booking):
     return new_booking
 
 
-def get_all_booking_of_specific_room(db: Session, room_id: int | None = None, event_id: int | None = None):
+def get_all_booking_of_specific_room(
+        db: Session,
+        room_id: int | None = None, 
+        event_id: int | None = None):
     """
         Get all booking of specific room
     """

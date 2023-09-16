@@ -22,7 +22,7 @@ def create_new_booking(
 
 
 @router.get("/booking/", status_code=status.HTTP_200_OK, response_model=list[BookingFromBase] | None)
-def get_all_event(
+def get_all_booking(
         db: Annotated[Session, Depends(get_db)],
         room_id: Annotated[int | None, Query(title="ID of room")] = None,
         event_id: Annotated[int | None, Query(title="ID of event")] = None):
@@ -33,7 +33,7 @@ def get_all_event(
 
 
 @router.patch("/booking/{booking_id}/", status_code=status.HTTP_200_OK, response_model=BookingFromBase)
-def update_event_by_id(
+def update_booking_by_id(
         db: Annotated[Session, Depends(get_db)],
         db_booking: Annotated[models.Booking, Depends(get_booking_by_id)],
         booking: BaseBooking):
@@ -43,7 +43,7 @@ def update_event_by_id(
     return booking_service.update_booking(db=db, db_booking=db_booking, booking=booking)
 
 
-@router.delete("/booking/{bookind_id}", status_code=204)
+@router.delete("/booking/{booking_id}/", status_code=204)
 def delete_booking(
         db: Annotated[Session, Depends(get_db)],
         db_booking: Annotated[models.Booking, Depends(get_booking_by_id)]):

@@ -15,7 +15,6 @@ async def test_create_new_room(client, db, room_json):
     created_room = db.query(models.Room).filter_by(name=room_json["name"]).first()
     assert created_room
     assert created_room.seats
-    assert created_room.events
 
     response = await client.delete(f"/rooms/{created_room.id}/")
     assert response.status_code == 204

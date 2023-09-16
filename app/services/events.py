@@ -10,12 +10,10 @@ def create_event(db: Session, event: Event) -> models.Event:
     """
         Create New Event Function
     """
-    
     new_event = models.Event(
          title=event.title, 
          additional_data=event.additional_data
     )
-
     try:
         db.add(new_event)
         db.commit()

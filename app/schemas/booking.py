@@ -6,8 +6,8 @@ from .events import Event
 
 
 class BaseBooking(BaseModel):
-    time_start: datetime.datetime
-    time_finish: datetime.datetime
+    time_start: datetime.datetime | None
+    time_finish: datetime.datetime | None
     additional_data: dict | None
 
     class Config:
