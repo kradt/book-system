@@ -33,15 +33,15 @@ def create_event(db: Session, db_room: models.Room, event: Event) -> models.Even
     if events_in_interval:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="The Room already have event it that time")
     
-    new_performance = models.Performance(
+    new_event = models.Event(
          title=event.title, 
          additional_data=event.additional_data
     )
-    new_event = models.Event(
+    new_booking = models.Event(
         time_start=event.time_start, 
         time_finish=event.time_finish
     )
-    new_event.performance = new_performance
+    new_event.performance = new_event
     new_event.room = db_room
 
     try:

@@ -11,7 +11,7 @@ from app import models
 router = APIRouter(tags=["Events"])
 
 
-@router.delete("/events/{event_id}/", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/event/{event_id}/", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_event_by_id(
     db: Annotated[Session, Depends(get_db)],
     event: Annotated[Event, Depends(get_event_by_id)]):
