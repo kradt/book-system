@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.dependencies import get_db, get_event_by_id, get_room_by_id
 from app.services import events as event_service
-from app.schemas.events import Event
+from app.schemas.events import Event, EventFromBase
 from app import models
 
 
@@ -22,18 +22,17 @@ async def delete_event_by_id(
     db.commit()
 
 
-@router.post("/rooms/{room_id}/events/", status_code=status.HTTP_201_CREATED, response_model=Event)
+@router.post("/events/", status_code=status.HTTP_201_CREATED, response_model=EventFromBase)
 async def create_event(
         db: Annotated[Session, Depends(get_db)],
-        db_room: Annotated[models.Room, Depends(get_room_by_id)],
         event: Event):
     """
         Create new event
     """
-    return event_service.create_event(db, db_room, event)
+    return event_service.create_event(db, event)
 
 
-@router.get("/events/{event_id}/", status_code=status.HTTP_200_OK, response_model=Event | None)
+@router.get("/events/{event_id}/", status_code=status.HTTP_200_OK, response_model=EventFromBase | None)
 def get_specific_event_by_id(event: Annotated[Event, Depends(get_event_by_id)]):
     """
         Get specific event using it id
@@ -41,9 +40,10 @@ def get_specific_event_by_id(event: Annotated[Event, Depends(get_event_by_id)]):
     return event
 
 
-@router.get("/rooms/{room_id}/events/", status_code=status.HTTP_200_OK, response_model=list[Event] | None)
-def get_all_event(db_room: Annotated[models.Room, Depends(get_room_by_id)]):
+@router.get("/events", status_code=status.HTTP_200_OK, response_model=list[EventFromBase] | None)
+def get_all_events(db: Annotated[Session, Depends(get_db)]):
     """
-        Get all events specific room
+        Get All Events Function
     """
-    return db_room.events
+    return db.query(models.Event).all()
+

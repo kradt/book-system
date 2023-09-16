@@ -13,7 +13,11 @@ class Room(BaseModel):
     """
     name: str | None = None
     seats: list[Seat] | None = None
-    events: list[Event] | None = None
 
     class Config:
         orm_mode = True
+
+
+class RoomFromBase(Room):
+    id: int
+

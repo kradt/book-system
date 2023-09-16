@@ -17,6 +17,7 @@ class Seat(Base):
     number = Column(Integer, nullable=False)
     booked = Column(Boolean, default=False)
     additional_data = Column(JSON)
+
     room_id = Column(Integer, ForeignKey("rooms.id", ondelete='CASCADE'), nullable=False)
     room = relationship("Room", back_populates="seats")
     __mapper_args__ = {'confirm_deleted_rows': False}
@@ -24,13 +25,15 @@ class Seat(Base):
 
 class Booking(Base):
     __tablename__ = "booking"
-
+    id = Column(Integer, primary_key=True)
     time_start = Column(DateTime, nullable=False)
     time_finish = Column(DateTime, nullable=False)
+    additional_data = Column(JSON)
 
-    room_id = Column(Integer, ForeignKey("rooms.id"), primary_key=True)
-    event_id = Column(Integer, ForeignKey("performances.id"), primary_key=True)
-    room = relationship("Room", back_populates="events")
+    room_id = Column(Integer, ForeignKey("rooms.id"))
+    event_id = Column(Integer, ForeignKey("events.id"))
+
+    room = relationship("Room", back_populates="booking")
     event = relationship("Event", back_populates="booking")
 
 
@@ -41,8 +44,10 @@ class Room(Base):
     __tablename__ = "rooms"
     id = Column(Integer, primary_key=True)
     name = Column(String(100), unique=True)
+
     seats = relationship("Seat", back_populates="room", cascade="save-update, merge, delete, delete-orphan")
-    events = relationship("Event", secondary="booking", back_populates="room", cascade="all, delete")
+    events = relationship("Event", secondary="booking", back_populates="rooms", cascade="all, delete")
+    booking = relationship("Booking", back_populates="room")
 
     def generate_seats(self, rows, columns) -> list[Seat]:
         seats = []
@@ -61,7 +66,8 @@ class Event(Base):
     __tablename__ = "events"
     id = Column(Integer, primary_key=True)
     title = Column(String(100), unique=True)
-    time_start = Column(DateTime, nullable=False)
-    time_finish = Column(DateTime, nullable=False)
     additional_data = Column(JSON)
-    rooms = relationship("Room", secondary="booking", back_populates="performance", cascade="all, delete")
+
+    rooms = relationship("Room", secondary="booking", back_populates="events", cascade="all, delete")
+    booking = relationship("Booking", back_populates="event")
+

@@ -1,15 +1,16 @@
 from fastapi import FastAPI
 
 from app import models, engine
-from app.routes import rooms, events, seats
+from app.routes import rooms, events, seats, booking
 
 
 app = FastAPI(title="Booking API system")
 
 
-app.include_router(events.router)
-app.include_router(seats.router)
 app.include_router(rooms.router)
+app.include_router(seats.router)
+app.include_router(events.router)
+app.include_router(booking.router)
 
 
 @app.on_event("startup")

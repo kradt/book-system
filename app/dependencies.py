@@ -1,4 +1,4 @@
-from fastapi import HTTPException, Depends, Path, status
+from fastapi import HTTPException, Depends, Path, status, Query
 from sqlalchemy.orm import Session
 from typing import Annotated 
 
@@ -15,7 +15,7 @@ def get_db() -> Session:
 
 def get_room_by_id(
         db: Annotated[Session, Depends(get_db)],
-        room_id: str) -> models.Room:
+        room_id: Annotated[int, Path(title="ID of room")] | Annotated[int, Query(title="ID of room")]) -> models.Room:
     """
         Depends that useing for getting specific room
     """

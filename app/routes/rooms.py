@@ -2,7 +2,7 @@ from typing import Annotated
 from fastapi import APIRouter, status, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.schemas.rooms import Room
+from app.schemas.rooms import Room, RoomFromBase
 from app.dependencies import (
     get_room_by_id,
     get_db
@@ -14,7 +14,7 @@ from app import models
 router = APIRouter(tags=["Rooms"])
 
 
-@router.patch("/rooms/{room_id}/", status_code=status.HTTP_200_OK, response_model=Room)
+@router.patch("/rooms/{room_id}/", status_code=status.HTTP_200_OK, response_model=RoomFromBase)
 async def update_room_info(
         db: Annotated[Session, Depends(get_db)],
         room: Room,
@@ -36,7 +36,7 @@ async def delete_room(
     db.commit()
 
 
-@router.post("/rooms/", status_code=status.HTTP_201_CREATED, response_model=Room)
+@router.post("/rooms/", status_code=status.HTTP_201_CREATED, response_model=RoomFromBase)
 async def create_new_room(
         db: Annotated[Session, Depends(get_db)],
         room: Room,
@@ -51,7 +51,7 @@ async def create_new_room(
     return room_service.create_room(db, room, autogenerate, columns, rows)
 
 
-@router.get("/rooms/{room_id}/", status_code=status.HTTP_200_OK, response_model=Room)
+@router.get("/rooms/{room_id}/", status_code=status.HTTP_200_OK, response_model=RoomFromBase)
 async def get_specific_room(db_room: Annotated[models.Room, Depends(get_room_by_id)]):
     """
         Getting specific room 
@@ -59,7 +59,7 @@ async def get_specific_room(db_room: Annotated[models.Room, Depends(get_room_by_
     return db_room
 
 
-@router.get("/rooms/", status_code=status.HTTP_200_OK, response_model=list[Room])
+@router.get("/rooms/", status_code=status.HTTP_200_OK, response_model=list[RoomFromBase])
 async def get_all_rooms(
         db: Annotated[Session, Depends(get_db)]):
     """
