@@ -1,6 +1,5 @@
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, JSON, ForeignKey, Table
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, JSON, ForeignKey
 
 
 Base = declarative_base()
@@ -70,4 +69,3 @@ class Event(Base):
 
     rooms = relationship("Room", secondary="booking", back_populates="events", cascade="all, delete")
     booking = relationship("Booking", back_populates="event")
-

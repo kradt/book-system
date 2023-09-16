@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 
 from app.schemas.seats import Seat
-from app.schemas.events import Event
 
 
 class Room(BaseModel):
@@ -20,4 +19,3 @@ class Room(BaseModel):
 
 class RoomFromBase(Room):
     id: int
-

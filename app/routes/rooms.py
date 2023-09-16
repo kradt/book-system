@@ -17,8 +17,8 @@ router = APIRouter(tags=["Rooms"])
 @router.patch("/rooms/{room_id}/", status_code=status.HTTP_200_OK, response_model=RoomFromBase)
 async def update_room_info(
         db: Annotated[Session, Depends(get_db)],
-        room: Room,
-        db_room: Annotated[models.Room, Depends(get_room_by_id)]):
+        db_room: Annotated[models.Room, Depends(get_room_by_id)],
+        room: Room):
     """
         Update room info
     """

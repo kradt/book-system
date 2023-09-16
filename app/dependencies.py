@@ -57,4 +57,3 @@ def get_booking_by_id(
     booking = db.query(models.Booking).filter_by(id=booking_id).first()
     is_exist(booking, detail="There is no such booking")
     return booking
-

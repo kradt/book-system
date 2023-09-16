@@ -23,8 +23,6 @@ def create_room(db: Session, room: Room, autogenerate: bool = False, columns: in
     else:
         seats = [models.Seat(**seat.dict()) for seat in room.seats if seat] if room.seats else []
 
-    events = [models.Event(**event.dict()) for event in room.events] if room.events else []
-    new_room.events = events
     new_room.seats = seats
     try:
         db.add(new_room)

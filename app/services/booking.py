@@ -7,7 +7,6 @@ from app.schemas.booking import Booking, BaseBooking
 from app import models
 
 
-
 def is_time_booked(db: Session, time_start, time_finish, room_id):
     """
         Return True if time have already booked in passed time
@@ -76,7 +75,6 @@ def update_booking(db: Session, db_booking: models.Booking, booking: BaseBooking
     """
         Update some room
     """
-
     if is_time_booked(db, time_start=booking.time_start, time_finish=booking.time_finish, room_id=db_booking.room.id):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="The Room already have event it that time")
     

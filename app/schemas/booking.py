@@ -23,5 +23,6 @@ class Booking(BaseBooking):
     room: Room
     event: Event
 
+
 class BookingFromBase(Booking):
     id: int

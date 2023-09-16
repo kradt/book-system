@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from typing import Annotated
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_db, get_event_by_id, get_room_by_id
+from app.dependencies import get_db, get_event_by_id
 from app.services import events as event_service
 from app.schemas.events import Event, EventFromBase
 from app import models
@@ -11,7 +11,7 @@ from app import models
 router = APIRouter(tags=["Events"])
 
 
-@router.delete("/event/{event_id}/", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/events/{event_id}/", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_event_by_id(
     db: Annotated[Session, Depends(get_db)],
     event: Annotated[Event, Depends(get_event_by_id)]):
@@ -40,10 +40,9 @@ def get_specific_event_by_id(event: Annotated[Event, Depends(get_event_by_id)]):
     return event
 
 
-@router.get("/events", status_code=status.HTTP_200_OK, response_model=list[EventFromBase] | None)
+@router.get("/events/", status_code=status.HTTP_200_OK, response_model=list[EventFromBase] | None)
 def get_all_events(db: Annotated[Session, Depends(get_db)]):
     """
         Get All Events Function
     """
     return db.query(models.Event).all()
-
