@@ -3,8 +3,24 @@ from sqlalchemy.orm import Session
 
 from fastapi import HTTPException, status
 
-from app.schemas.booking import Booking, BookingFromBase
+from app.schemas.booking import Booking, BaseBooking
 from app import models
+
+
+
+def is_time_booked(db: Session, time_start, time_finish, room_id):
+    """
+        Return True if time have already booked in passed time
+    """
+    events_in_interval = db.query(models.Booking).filter(
+        and_(
+             or_(
+                between(models.Booking.time_start, time_start, time_finish),
+                between(models.Booking.time_finish, time_start, time_finish)
+             ),
+             models.Booking.room_id == room_id
+    )).all()
+    return bool(events_in_interval)
 
 
 def create_booking(db: Session, booking: Booking):
@@ -29,16 +45,7 @@ def create_booking(db: Session, booking: Booking):
     if not db_event:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="The event with this id doesn't exist")
 
-    events_in_interval = db.query(models.Booking).filter(
-        and_(
-             or_(
-                between(models.Booking.time_start, booking.time_start, booking.time_finish),
-                between(models.Booking.time_finish, booking.time_start, booking.time_finish)
-             ),
-             models.Booking.room_id == db_room.id
-    )).all()
-
-    if events_in_interval:
+    if is_time_booked(db, time_start=booking.time_start, time_finish=booking.time_finish, room_id=db_room.id):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="The Room already have event it that time")
     
     new_booking = models.Booking(
@@ -54,9 +61,31 @@ def create_booking(db: Session, booking: Booking):
 
 
 def get_all_booking_of_specific_room(db: Session, room_id: int | None = None, event_id: int | None = None):
+    """
+        Get all booking of specific room
+    """
     filter_properties = {}
     if room_id:
         filter_properties["room_id"] = room_id
     if event_id:
         filter_properties["event_id"] = room_id
     return db.query(models.Booking).filter_by(**filter_properties).all()
+
+
+def update_booking(db: Session, db_booking: models.Booking, booking: BaseBooking):
+    """
+        Update some room
+    """
+
+    if is_time_booked(db, time_start=booking.time_start, time_finish=booking.time_finish, room_id=db_booking.room.id):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="The Room already have event it that time")
+    
+    if booking.time_start:
+        db_booking.time_finish = booking.time_start
+    if booking.time_finish:
+        db_booking.time_finish = booking.time_finish
+    if booking.additional_data:
+        db_booking.additional_data = booking.additional_data
+    db.add(db_booking)
+    db.commit()
+    return db_booking
