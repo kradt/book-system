@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from fastapi import HTTPException, status
 
-from app.schemas.booking import Booking
+from app.schemas.booking import Booking, BookingFromBase
 from app import models
 
 
@@ -51,7 +51,7 @@ def create_booking(db: Session, booking: Booking):
     db.add(new_booking)
     db.commit()
     return new_booking
-    
+
 
 def get_all_booking_of_specific_room(db: Session, room_id: int | None = None, event_id: int | None = None):
     filter_properties = {}

@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import Annotated 
 
 from app import models, SessionLocal
+from app.utills import is_exist
 
 
 def get_db() -> Session:
@@ -15,13 +16,12 @@ def get_db() -> Session:
 
 def get_room_by_id(
         db: Annotated[Session, Depends(get_db)],
-        room_id: Annotated[int, Path(title="ID of room")] | Annotated[int | None, Query(title="ID of room")]) -> models.Room:
+        room_id: Annotated[int, Path(title="ID of room")]) -> models.Room:
     """
         Depends that useing for getting specific room
     """
     room = db.query(models.Room).filter_by(id=room_id).first()
-    if not room:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="There is no such room")
+    is_exist(room, detail="There is no such room")
     return room
 
 
@@ -33,18 +33,28 @@ def get_seat_by_number(
         Depends that using for getting specific seat
     """
     seat = db.query(models.Seat).filter_by(room_id=db_room.id, number=seat_number).first()
-    if not seat:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="There is no such seat")
+    is_exist(seat, detail="There is no such seat")
     return seat
 
 
 def get_event_by_id(
         db: Annotated[Session, Depends(get_db)],
-        event_id: Annotated[int, Path(title="ID of event")] | Annotated[int | None, Query(title="ID of event")]) -> models.Event:
+        event_id: Annotated[int, Path(title="ID of event")]) -> models.Event:
     """
         Depends that using for getting event by id
     """
     event = db.query(models.Event).filter_by(id=event_id).first()
-    if not event:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="There is no such event")
+    is_exist(event, detail="There is no such event")
     return event
+
+
+def get_booking_by_id(
+        db: Annotated[Session, Depends(get_db)],
+        booking_id: Annotated[int, Path(title="ID of booking")]):
+    """
+        Depends that using for getting booking by id
+    """
+    booking = db.query(models.Booking).filter_by(id=booking_id).first()
+    is_exist(booking, detail="There is no such booking")
+    return booking
+
