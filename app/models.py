@@ -23,6 +23,9 @@ class Seat(Base):
 
 
 class Booking(Base):
+    """
+        Model that implement some booking using relation Room with Event and adding additional data like time start and time finish
+    """
     __tablename__ = "booking"
     id = Column(Integer, primary_key=True)
     time_start = Column(DateTime, nullable=False)
@@ -34,6 +37,7 @@ class Booking(Base):
 
     room = relationship("Room", back_populates="booking")
     event = relationship("Event", back_populates="booking")
+    __mapper_args__ = {'confirm_deleted_rows': False}
 
 
 class Room(Base):
@@ -45,8 +49,8 @@ class Room(Base):
     name = Column(String(100), unique=True)
 
     seats = relationship("Seat", back_populates="room", cascade="save-update, merge, delete, delete-orphan")
-    events = relationship("Event", secondary="booking", back_populates="rooms", cascade="all, delete")
-    booking = relationship("Booking", back_populates="room")
+    booking = relationship("Booking", passive_deletes=True, back_populates="room", cascade="all, delete")
+    __mapper_args__ = {'confirm_deleted_rows': False}
 
     def generate_seats(self, rows, columns) -> list[Seat]:
         seats = []
@@ -66,6 +70,6 @@ class Event(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String(100), unique=True)
     additional_data = Column(JSON)
+    __mapper_args__ = {'confirm_deleted_rows': False}
 
-    rooms = relationship("Room", secondary="booking", back_populates="events", cascade="all, delete")
-    booking = relationship("Booking", back_populates="event")
+    booking = relationship("Booking", passive_deletes=True, back_populates="event", cascade="all, delete")

@@ -12,7 +12,6 @@ class BaseConfig(BaseSettings):
     DEBUG: bool = False
     SECRET_KEY: str = os.getenv("SECRET_KEY", default=secrets.token_hex())
     DATABASE_URL: str = os.getenv("DATABASE_URL")
-    print(DATABASE_URL)
 
 
 class DevelopmentConfig(BaseConfig):

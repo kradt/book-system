@@ -9,15 +9,22 @@ services:
     env_file: ./.env
     environment:
       DEBUG: 1
+    volumes:
+      - .:/app/volumes/book-service
     depends_on:
     - postgres
-  test:
+    - tests
+
+  tests:
     build:
       context: .
       dockerfile: Dockerfile
     command: ["python", "-m", "pytest", "tests"]
+    environment:
+      SQLALCHEMY_SILENCE_UBER_WARNING: 1
     depends_on:
     - postgres
+
   postgres:
     image: postgres:latest
     container_name: postgresql
@@ -27,3 +34,5 @@ services:
       - POSTGRES_DB=test
     ports:
       - 5432:5432
+    expose:
+      - 5432

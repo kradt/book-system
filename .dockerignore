@@ -8,3 +8,4 @@ LICENCSE
 README.md
 .gitignore
 run.py
+.coverage

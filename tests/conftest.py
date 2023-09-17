@@ -40,9 +40,11 @@ def created_room(db, room_json):
     db.commit()
     yield room
     try:
+        [db.delete(book) for book in room.booking]
         db.delete(room)
         db.commit()
-    except Exception:
+    except Exception as e:
+        print(e)
         pass
 
 
@@ -57,9 +59,11 @@ def created_event(db):
     db.commit()
     yield new_event
     try:
+        [db.delete(book) for book in new_event.booking]
         db.delete(new_event)
         db.commit()
-    except Exception:
+    except Exception as e:
+        print(e)
         pass
 
 
