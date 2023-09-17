@@ -1,4 +1,4 @@
-from fastapi import HTTPException, Depends, Path, status, Query
+from fastapi import Depends, Path
 from sqlalchemy.orm import Session
 from typing import Annotated 
 

@@ -1,6 +1,5 @@
 from sqlalchemy import and_, or_, between
 from sqlalchemy.orm import Session
-
 from fastapi import HTTPException, status
 
 from app.schemas.booking import Booking, BaseBooking

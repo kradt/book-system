@@ -2,6 +2,7 @@ import pytest
 import datetime
 from asgi_lifespan import LifespanManager
 from httpx import AsyncClient
+
 from app import models
 from app.main import app
 from app.dependencies import get_db
@@ -44,7 +45,6 @@ def created_room(db, room_json):
         db.delete(room)
         db.commit()
     except Exception as e:
-        print(e)
         pass
 
 
@@ -63,7 +63,6 @@ def created_event(db):
         db.delete(new_event)
         db.commit()
     except Exception as e:
-        print(e)
         pass
 
 

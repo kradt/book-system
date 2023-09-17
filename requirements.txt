@@ -1,11 +1,8 @@
 asgi-lifespan==1.0.1
 httpx==0.25.0
-asyncpg==0.28.0
 fastapi==0.103.1
-motor==3.3.1
 psycopg2-binary==2.9.7
 pydantic==1.10.12
-pymongo==4.5.0
 pytest==7.4.2
 pytest-asyncio==0.16.0
 python-dotenv==1.0.0
