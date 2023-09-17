@@ -1,3 +1,4 @@
+import datetime
 from sqlalchemy import and_, or_, between
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
@@ -7,7 +8,11 @@ from app.utills import is_exist
 from app import models
 
 
-def is_time_booked(db: Session, time_start, time_finish, room_id):
+def is_time_booked(
+        db: Session,
+        time_start: datetime.datetime, 
+        time_finish: datetime.datetime, 
+        room_id: int) -> bool:
     """
         Return True if time have already booked in passed time
     """
@@ -22,7 +27,7 @@ def is_time_booked(db: Session, time_start, time_finish, room_id):
     return bool(events_in_interval)
 
 
-def create_booking(db: Session, booking: Booking):
+def create_booking(db: Session, booking: Booking) -> models.Booking:
     """
         Сreate new booking function with checking availability of the room
         If room already booked in that time, Error will be raised
@@ -59,7 +64,7 @@ def create_booking(db: Session, booking: Booking):
 def get_all_booking_of_specific_room(
         db: Session,
         room_id: int | None = None, 
-        event_id: int | None = None):
+        event_id: int | None = None) -> list[models.Booking]:
     """
         Get all booking of specific room
     """
@@ -71,7 +76,7 @@ def get_all_booking_of_specific_room(
     return db.query(models.Booking).filter_by(**filter_properties).all()
 
 
-def update_booking(db: Session, db_booking: models.Booking, booking: BaseBooking):
+def update_booking(db: Session, db_booking: models.Booking, booking: BaseBooking) -> models.Booking:
     """
         Update some room
     """

@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status
 
 
-def is_exist(obj, status_code: status = status.HTTP_404_NOT_FOUND, detail: str | None = None) -> bool | None:
+def is_exist(obj, status_code: status = status.HTTP_404_NOT_FOUND, detail: str | None = None) -> bool:
     """
         Return True if obj is exist and raise an error when obj is not exist
     """

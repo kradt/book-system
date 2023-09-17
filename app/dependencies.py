@@ -50,7 +50,7 @@ def get_event_by_id(
 
 def get_booking_by_id(
         db: Annotated[Session, Depends(get_db)],
-        booking_id: Annotated[int, Path(title="ID of booking")]):
+        booking_id: Annotated[int, Path(title="ID of booking")]) -> models.Booking:
     """
         Depends that using for getting booking by id
     """

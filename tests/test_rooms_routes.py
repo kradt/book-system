@@ -60,6 +60,7 @@ async def test_create_new_room_with_the_same_name(client, db, room_json, created
     assert response.status_code == 400
     assert response_json["detail"] == "The room with the same name alreadt exist"
 
+
 @pytest.mark.asyncio
 async def test_get_room_by_id(client, created_room):
     """
