@@ -1,2 +1,2 @@
 # book-system
-The API for booking places in the cinema or theatre 
+The API for booking places in the cinema or theatre for some events
