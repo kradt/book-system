@@ -24,7 +24,7 @@ Navigate to the project directory:
 ```bash
 cd book-service-api
 ```
-Create a .env file in the project directory to store configuration variables. You can find an example .env.example file in the project for reference. Populate the .env file with the necessary environment variables specific to your setup. Here are two essential variables:
+Create a .env file in the project directory to store configuration variables. Populate the .env file with the necessary environment variables specific to your setup. Here is one essential variable:
 
 ```
 DATABASE_URL=your-database-url
@@ -43,7 +43,7 @@ Before you begin, make sure you have the following prerequisites installed on yo
 ```bash
 docker-compose up -d
 ```
-2. The API should now be running. You can access it at http://localhost:5000
+2. The API should now be running. You can access it at http://localhost:5000/
 
 3. Explore the API and its endpoints. You can find detailed API documentation and examples in our Swagger documentation at http://localhost:5000/docs or the URL where your Swagger documentation is hosted.
 
