@@ -17,7 +17,7 @@ To quickly set up and run the Book-Service API on your local development environ
 Clone the repository to your local machine:
 
 ```bash
-git clone https://github.com/yourusername/book-service-api.git
+git clone git@github.com:kradt/book-system.git
 ```
 Navigate to the project directory:
 
