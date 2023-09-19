@@ -1,17 +1,17 @@
 # book-system API
 
 ## Introduction
-The Book-Service API is a tool designed for cinemas and theaters to manage events, rooms, and seat bookings. It simplifies event scheduling, room configuration, and seat reservations, making it easy for entertainment venues to enhance their operations and provide a seamless booking experience for customers
+The Book-System API is a tool designed for cinemas and theaters to manage events, rooms, and seat bookings. It simplifies event scheduling, room configuration, and seat reservations, making it easy for entertainment venues to enhance their operations and provide a seamless booking experience for customers
 
 ## Key Features
 - Event Management: This API provides robust capabilities for creating and managing events. Events could represent various performances, shows, or film screenings, allowing venues to offer a wide range of entertainment options.
 
 - Room Configuration: Venues can create, configure, and manage rooms to accommodate different types of events. Whether it's a small theater for an intimate play or a large cinema hall for blockbuster movies, the API has you covered.
 
-- Seat Booking: With the Book-Service API, integrating seat booking logic into your platform is a breeze. API simplifies the process, ensuring a seamless and user-friendly seat booking experience for your customers.
+- Seat Booking: With the Book-System API, integrating seat booking logic into your platform is a breeze. API simplifies the process, ensuring a seamless and user-friendly seat booking experience for your customers.
 
 ## Getting Started
-To quickly set up and run the Book-Service API on your local development environment, we recommend using Docker Compose. This method streamlines the setup process and ensures that all required services are running in a consistent environment.
+To quickly set up and run the Book-System API on your local development environment, we recommend using Docker Compose. This method streamlines the setup process and ensures that all required services are running in a consistent environment.
 
 ### Configuration
 Clone the repository to your local machine:
@@ -22,7 +22,7 @@ git clone git@github.com:kradt/book-system.git
 Navigate to the project directory:
 
 ```bash
-cd book-service-api
+cd book-system-api
 ```
 Create a .env file in the project directory to store configuration variables. Populate the .env file with the necessary environment variables specific to your setup. Here is one essential variable:
 
@@ -53,4 +53,4 @@ To stop the application and remove the containers, run:
 docker-compose down
 ```
 
-That's it! You're now ready to start using the Book-Service API with Docker Compose on your local machine.
+That's it! You're now ready to start using the Book-System API with Docker Compose on your local machine.
