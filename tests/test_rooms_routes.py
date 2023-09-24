@@ -141,4 +141,4 @@ async def test_patch_query_to_rooms_with_alredy_exsiting_name(client, db, create
     assert room["detail"] == "The room with the same name alreadt exist"
 
     room = db.query(models.Room).filter_by(name=name).first()
-    await client.delete(f"/rooms/{room.id}")
+    await client.delete(f"/rooms/{room.id}/")
