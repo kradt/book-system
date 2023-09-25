@@ -32,14 +32,20 @@ async def create_event(
     return event_service.create_event(db, event)
 
 
+@router.get("/events/{event_id}/", status_code=status.HTTP_200_OK, response_model=EventFromBase | None)
+def get_specific_event_by_id(event: Annotated[Event, Depends(get_event_by_id)]):
+    """
+        Get specific event using it id
+    """
+    return event
+
+
 @router.get("/events/", status_code=status.HTTP_200_OK, response_model=list[EventFromBase] | None)
 def get_all_events(
         db: Annotated[Session, Depends(get_db)],
-        id: Annotated[int | None, Query(None, title="Event id")] = None,
-        name: Annotated[str | None, Query(None, title="Event name")] = None):
+        title: Annotated[str | None, Query(None, title="Event title")] = None):
     """
         Get All Events Function
     """
-    filters = {k: v for k, v in {"id": id, "name": name}.items() if v}
-    events = db.query(models.Event).filter_by(**filters).all()
-    return events[0] if len(events) == 1 else events
+    events = db.query(models.Event)
+    return events.filter_by(title=title) if title else events.all()

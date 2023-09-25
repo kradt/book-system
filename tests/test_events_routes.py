@@ -4,7 +4,7 @@ from app import models
 
 
 @pytest.mark.asyncio
-async def test_get_all_events_specific_room_by_room_id(client, created_room):
+async def test_get_all_events(client, created_room):
     """
         Test getting all event events of some room
     """
@@ -50,13 +50,12 @@ async def test_create_event_with_already_existing_name(client, db, created_event
 
 
 @pytest.mark.asyncio
-async def test_getting_specific_event_by_it_id(client, created_event):
+async def test_getting_specific_event_by_id(client, created_event):
     """
         Test getting specific event by id
     """
     response = await client.get(f"/events/{created_event.id}/")
     event = response.json()
-    print(event)
     assert response.status_code == 200
     assert event["title"] == created_event.title
 
