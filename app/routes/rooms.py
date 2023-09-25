@@ -51,18 +51,16 @@ async def create_new_room(
     return room_service.create_room(db, room, autogenerate, columns, rows)
 
 
-@router.get("/rooms/{room_id}/", status_code=status.HTTP_200_OK, response_model=RoomFromBase)
-async def get_specific_room(db_room: Annotated[models.Room, Depends(get_room_by_id)]):
-    """
-        Getting specific room 
-    """
-    return db_room
-
-
 @router.get("/rooms/", status_code=status.HTTP_200_OK, response_model=list[RoomFromBase])
 async def get_all_rooms(
-        db: Annotated[Session, Depends(get_db)]):
+        db: Annotated[Session, Depends(get_db)],
+        id: Annotated[int | None, Query(None, title="Room id")] = None,
+        name: Annotated[str | None, Query(None, title="Room name")] = None):
     """
         Getting all rooms saved in the database
     """
-    return db.query(models.Room).all()
+    filters = {k: v for k, v in {"id": id, "name": name}.items() if v}
+    rooms = db.query(models.Room).filter_by(**filters).all()
+    if len(rooms) == 1:
+        return rooms[0]
+    return rooms
