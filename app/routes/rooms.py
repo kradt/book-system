@@ -59,7 +59,7 @@ async def get_specific_room(db_room: Annotated[models.Room, Depends(get_room_by_
     return db_room
 
 
-@router.get("/rooms/", status_code=status.HTTP_200_OK, response_model=list[RoomFromBase])
+@router.get("/rooms/", status_code=status.HTTP_200_OK, response_model=list[RoomFromBase] | RoomFromBase | None)
 async def get_all_rooms(
         db: Annotated[Session, Depends(get_db)],
         name: Annotated[str | None, Query(title="Room name")] = None):

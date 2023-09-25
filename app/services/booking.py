@@ -72,7 +72,7 @@ def get_all_booking_of_specific_room(
     if room_id:
         filter_properties["room_id"] = room_id
     if event_id:
-        filter_properties["event_id"] = room_id
+        filter_properties["event_id"] = event_id
     return db.query(models.Booking).filter_by(**filter_properties).all()
 
 

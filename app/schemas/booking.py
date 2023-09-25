@@ -24,5 +24,5 @@ class Booking(BaseBooking):
     event: Event
 
 
-class BookingFromBase(Booking):
+class BookingFromBase(BookingCreate):
     id: int
