@@ -61,6 +61,4 @@ async def get_all_rooms(
     """
     filters = {k: v for k, v in {"id": id, "name": name}.items() if v}
     rooms = db.query(models.Room).filter_by(**filters).all()
-    if len(rooms) == 1:
-        return rooms[0]
-    return rooms
+    return rooms[0] if len(rooms) == 1 else rooms
