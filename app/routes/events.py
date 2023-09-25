@@ -43,7 +43,7 @@ def get_specific_event_by_id(event: Annotated[Event, Depends(get_event_by_id)]):
 @router.get("/events/", status_code=status.HTTP_200_OK, response_model=list[EventFromBase] | None)
 def get_all_events(
         db: Annotated[Session, Depends(get_db)],
-        title: Annotated[str | None, Query(None, title="Event title")] = None):
+        title: Annotated[str | None, Query(title="Event title")] = None):
     """
         Get All Events Function
     """
