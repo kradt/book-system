@@ -2,7 +2,7 @@ from typing import Annotated
 from fastapi import APIRouter, status, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from app.schemas.rooms import Room, RoomFromBase
+from app.schemas.rooms import Room, RoomFromBase, RoomCreate
 from app.dependencies import (
     get_room_by_id,
     get_db
@@ -18,7 +18,7 @@ router = APIRouter(tags=["Rooms"])
 async def update_room_info(
         db: Annotated[Session, Depends(get_db)],
         db_room: Annotated[models.Room, Depends(get_room_by_id)],
-        room: Room):
+        room: RoomCreate):
     """
         Update room info
     """
@@ -39,7 +39,7 @@ async def delete_room(
 @router.post("/rooms/", status_code=status.HTTP_201_CREATED, response_model=RoomFromBase)
 async def create_new_room(
         db: Annotated[Session, Depends(get_db)],
-        room: Room,
+        room: RoomCreate,
         autogenerate: Annotated[bool | None, Query(title="If True the seats will be generated before creating")] = False,
         columns: Annotated[int | None, Query(title="Amount of columns in the room")] = None,
         rows: Annotated[int | None, Query(title="Amount of rows in the room")] = None):

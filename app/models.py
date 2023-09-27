@@ -48,7 +48,7 @@ class Room(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(100), unique=True)
 
-    seats = relationship("Seat", back_populates="room", cascade="save-update, merge, delete, delete-orphan")
+    seats = relationship("Seat", back_populates="room", cascade="save-update, merge, delete, delete-orphan", order_by="Seat.number")
     booking = relationship("Booking", passive_deletes=True, back_populates="room", cascade="all, delete")
     __mapper_args__ = {'confirm_deleted_rows': False}
 
