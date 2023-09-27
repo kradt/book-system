@@ -25,14 +25,13 @@ def get_room_by_id(
     return room
 
 
-def get_seat_by_number(
+def get_seat_by_id(
         db: Annotated[Session, Depends(get_db)],
-        db_room: Annotated[models.Room, Depends(get_room_by_id)], 
-        seat_number: Annotated[int, Path(title="Number of seat in the room")]) -> models.Seat:
+        seat_id: Annotated[int, Path(title="ID of seat")]):
     """
         Depends that using for getting specific seat
     """
-    seat = db.query(models.Seat).filter_by(room_id=db_room.id, number=seat_number).first()
+    seat = db.query(models.Seat).filter_by(id=seat_id).first()
     is_exist(seat, detail="There is no such seat")
     return seat
 
@@ -64,6 +63,8 @@ def get_seats(
         db_room: Annotated[models.Room, Depends(get_room_by_id)], 
         number: Annotated[int | None, Query(title="Number of seat")] = None,
         booked: Annotated[bool | None, Query(title="Booking of seat")] = None):
-    filters = {key: value for key, value in {"number": number, "booked": booked} if value}
-    seats = db.query(models.Seat).filter_by(**filters).all()
-    return seats[0] if len(seats) == 1 else seats
+    """
+        Depends that gets seats by some special data
+    """
+    filters = {key: value for key, value in {"number": number, "booked": booked, "room_id": db_room.id}.items() if value}
+    return db.query(models.Seat).filter_by(**filters).all()

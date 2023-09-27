@@ -67,4 +67,4 @@ async def get_all_rooms(
         Getting all rooms saved in the database
     """
     rooms = db.query(models.Room)
-    return rooms.filter_by(name=name).first() if name else rooms.all()
+    return rooms.filter_by(name=name).all() if name else rooms.all() 

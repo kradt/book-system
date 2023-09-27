@@ -22,3 +22,6 @@ class Seat(SeatCreate):
     column: int = Field(gt=0)
     row: int = Field(gt=0)
     number: int = Field(gt=0)
+
+class SeatFromBase(Seat):
+    id: int
