@@ -54,3 +54,14 @@ docker-compose down
 ```
 
 That's it! You're now ready to start using the Book-System API with Docker Compose on your local machine.
+
+## Using the Book-System SDK
+
+You have the option to either use the provided <a href="https://github.com/kradt/book-system-SDK target='_blank'">Book-System SDK</a> or develop your own integration with the API.
+
+- Option 1: Use the SDK
+To simplify interaction with the Book-System API, you can utilize the <a href="https://github.com/kradt/book-system-SDK target='_blank'">Book-System SDK</a>. The SDK offers a convenient way to manage events, rooms, and seat bookings programmatically.
+
+- Option 2: Write Your Own Integration
+If you prefer a custom approach, you can write your own integration with the API. Comprehensive API documentation is available to assist you in building your solution from scratch.
+
