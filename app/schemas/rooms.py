@@ -5,6 +5,7 @@ from app.schemas.seats import SeatFromBase, Seat
 
 class BaseRoom(BaseModel):
     name: str | None = None
+    additional_data: dict | None = None
 
 
 class Room(BaseRoom):
