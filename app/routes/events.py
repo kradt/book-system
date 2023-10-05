@@ -11,6 +11,17 @@ from app import models
 router = APIRouter(tags=["Events"])
 
 
+@router.patch("/events/{room_id}/", status_code=status.HTTP_200_OK, response_model=EventFromBase)
+async def update_room_info(
+        db: Annotated[Session, Depends(get_db)],
+        db_event: Annotated[models.Room, Depends(get_event_by_id)],
+        event: Event):
+    """
+        Update room info
+    """
+    return event_service.update_event(db, db_event, event)
+
+
 @router.delete("/events/{event_id}/", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_event_by_id(
         db: Annotated[Session, Depends(get_db)],
