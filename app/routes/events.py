@@ -11,7 +11,7 @@ from app import models
 router = APIRouter(tags=["Events"])
 
 
-@router.patch("/events/{room_id}/", status_code=status.HTTP_200_OK, response_model=EventFromBase)
+@router.patch("/events/{event_id}/", status_code=status.HTTP_200_OK, response_model=EventFromBase)
 async def update_room_info(
         db: Annotated[Session, Depends(get_db)],
         db_event: Annotated[models.Room, Depends(get_event_by_id)],
