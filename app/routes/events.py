@@ -58,5 +58,5 @@ def get_all_events(
     """
         Get All Events Function
     """
-    events = db.query(models.Event)
+    events = db.query(models.Event).order_by(models.Event.title)
     return events.filter_by(title=title).all() if title else events.all()
