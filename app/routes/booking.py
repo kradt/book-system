@@ -3,7 +3,7 @@ from typing import Annotated
 from sqlalchemy.orm import Session
 
 from app import models
-from app.dependencies import get_db, get_booking_by_id
+from app.dependencies import get_db, get_booking_by_id, get_booking_by_id
 from app.services import booking as booking_service
 from app.schemas.booking import BookingCreate, BookingFromBase, BaseBooking
 
@@ -30,6 +30,14 @@ def get_all_booking(
         Get all events specific room
     """
     return booking_service.get_all_booking_of_specific_room(db, room_id, event_id)
+
+
+@router.get("/events/{event_id}/", status_code=status.HTTP_200_OK, response_model=BookingFromBase | None)
+def get_specific_event_by_id(booking: Annotated[BookingFromBase, Depends(get_booking_by_id)]):
+    """
+        Get specific booking using it id
+    """
+    return booking
 
 
 @router.patch("/booking/{booking_id}/", status_code=status.HTTP_200_OK, response_model=BookingFromBase)
